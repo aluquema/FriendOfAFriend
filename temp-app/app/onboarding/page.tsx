@@ -1,11 +1,34 @@
 "use client";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  "https://tmzcaxrqttblfrytenae.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRtemNheHJxdHRibGZyeXRlbmFlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4OTU5NTgsImV4cCI6MjA5MjQ3MTk1OH0.3lYKH-FZc8n-FUdnffUvKP294c72mAEzOV93iqb2rxM"
+);
 
 export default function Onboarding() {
+  const router = useRouter();
   const [step, setStep] = useState(1);
   const [screenname, setScreenname] = useState("");
   const [ageRange, setAgeRange] = useState("");
   const [gender, setGender] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async () => {
+    setLoading(true);
+    const { error } = await supabase
+      .from("profiles")
+      .insert([{ screenname, age_range: ageRange, gender }]);
+
+    if (error) {
+      console.error(error);
+      setLoading(false);
+    } else {
+      router.push("/map");
+    }
+  };
 
   return (
     <main className="min-h-screen bg-black text-white flex flex-col items-center justify-center px-6">
@@ -74,10 +97,11 @@ export default function Onboarding() {
               ))}
             </div>
             <button
-              onClick={() => alert("Profile created! Map coming soon.")}
-              className="w-full bg-white text-black text-sm py-3 hover:bg-zinc-200 transition"
+              onClick={handleSubmit}
+              disabled={loading}
+              className="w-full bg-white text-black text-sm py-3 hover:bg-zinc-200 transition disabled:opacity-30"
             >
-              enter the map
+              {loading ? "saving..." : "enter the map"}
             </button>
           </div>
         )}
