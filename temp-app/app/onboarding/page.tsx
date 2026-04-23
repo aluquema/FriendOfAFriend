@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
 
@@ -15,16 +15,53 @@ export default function Onboarding() {
   const [ageRange, setAgeRange] = useState("");
   const [gender, setGender] = useState("");
   const [loading, setLoading] = useState(false);
+  const [entrySong, setEntrySong] = useState<any>(null);
+
+  useEffect(() => {
+    const song = sessionStorage.getItem("entrySong");
+    if (song) setEntrySong(JSON.parse(song));
+  }, []);
 
   const handleSubmit = async () => {
     setLoading(true);
-    const { error } = await supabase
-      .from("profiles")
-      .insert([{ screenname, age_range: ageRange, gender }]);
 
-    if (error) {
-      console.error(error);
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .insert([{ screenname, age_range: ageRange, gender }])
+      .select()
+      .single();
+
+    if (profileError) {
+      console.error(profileError);
       setLoading(false);
+      return;
+    }
+
+    if (entrySong && profile) {
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          await supabase.from("songs").insert([{
+            song_name: entrySong.title,
+            artist: entrySong.artist,
+            profile_id: profile.id,
+            latitude: pos.coords.latitude,
+            longitude: pos.coords.longitude,
+          }]);
+          sessionStorage.removeItem("entrySong");
+          router.push("/map");
+        },
+        async () => {
+          await supabase.from("songs").insert([{
+            song_name: entrySong.title,
+            artist: entrySong.artist,
+            profile_id: profile.id,
+            latitude: 40.7128 + (Math.random() - 0.5) * 0.05,
+            longitude: -74.006 + (Math.random() - 0.5) * 0.05,
+          }]);
+          sessionStorage.removeItem("entrySong");
+          router.push("/map");
+        }
+      );
     } else {
       router.push("/map");
     }
@@ -36,6 +73,16 @@ export default function Onboarding() {
         <h1 className="text-sm tracking-widest text-zinc-400 uppercase">
           friend of a friend
         </h1>
+
+        {entrySong && (
+          <div className="flex items-center gap-3 p-3 border border-zinc-800 bg-zinc-900">
+            <div>
+              <p className="text-xs text-zinc-500">your entry song</p>
+              <p className="text-sm text-white">{entrySong.title}</p>
+              <p className="text-xs text-zinc-500">{entrySong.artist}</p>
+            </div>
+          </div>
+        )}
 
         {step === 1 && (
           <div className="space-y-6">
