@@ -1,4 +1,11 @@
+"use client";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+
 export default function Home() {
+  const router = useRouter();
+  const [song, setSong] = useState("");
+
   return (
     <main className="min-h-screen bg-black text-white flex flex-col items-center justify-center px-6">
       <div className="max-w-xl w-full space-y-8">
@@ -19,9 +26,15 @@ export default function Home() {
           <input
             type="text"
             placeholder="paste a song link or type a song name..."
+            value={song}
+            onChange={(e) => setSong(e.target.value)}
             className="w-full bg-zinc-900 border border-zinc-700 text-white placeholder-zinc-600 px-4 py-3 rounded-none text-sm focus:outline-none focus:border-white transition"
           />
-          <button className="mt-3 w-full bg-white text-black text-sm py-3 hover:bg-zinc-200 transition">
+          <button
+            onClick={() => router.push("/welcome")}
+            disabled={!song}
+            className="mt-3 w-full bg-white text-black text-sm py-3 hover:bg-zinc-200 transition disabled:opacity-30"
+          >
             enter
           </button>
         </div>
