@@ -1,26 +1,82 @@
 @import "tailwindcss";
 
+/* ── FRIEND OF A FRIEND — DESIGN SYSTEM ── */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0a0a0a;
+  --foreground: #ededed;
+
+  /* Accent */
+  --accent: #ff3b3b;
+  --accent-glow: rgba(255, 59, 59, 0.35);
+
+  /* Type */
+  --font-display: var(--font-playfair);
+  --font-ui: var(--font-dm-mono);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-accent: var(--accent);
+  --font-sans: var(--font-dm-mono);
+  --font-display: var(--font-playfair);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ── BASE ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-ui), monospace;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── FILM GRAIN ── */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+  opacity: 0.04;
+  mix-blend-mode: overlay;
+}
+
+/* ── GLOW UTILITIES ── */
+.glow {
+  text-shadow:
+    0 0 10px var(--accent-glow),
+    0 0 30px var(--accent-glow),
+    0 0 60px var(--accent-glow);
+}
+
+.glow-box {
+  box-shadow:
+    0 0 10px var(--accent-glow),
+    0 0 30px var(--accent-glow);
+}
+
+.glow-border {
+  border: 1px solid var(--accent);
+  box-shadow:
+    0 0 8px var(--accent-glow),
+    inset 0 0 8px var(--accent-glow);
+}
+
+/* ── TYPE UTILITIES ── */
+.font-display {
+  font-family: var(--font-display), serif;
+}
+
+.text-accent {
+  color: var(--accent);
 }

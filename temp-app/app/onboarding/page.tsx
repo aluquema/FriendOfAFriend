@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
 
@@ -16,10 +16,39 @@ export default function Onboarding() {
   const [gender, setGender] = useState("");
   const [loading, setLoading] = useState(false);
   const [entrySong, setEntrySong] = useState<any>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const headlineRef = useRef<HTMLHeadingElement>(null);
+  const [headlineFontSize, setHeadlineFontSize] = useState(64);
 
   useEffect(() => {
-    const song = sessionStorage.getItem("entrySong");
-    if (song) setEntrySong(JSON.parse(song));
+    const fit = () => {
+      if (!containerRef.current || !headlineRef.current) return;
+      const containerWidth = containerRef.current.offsetWidth;
+      let size = 16;
+      headlineRef.current.style.fontSize = size + "px";
+      while (headlineRef.current.scrollWidth <= containerWidth && size < 200) {
+        size++;
+        headlineRef.current.style.fontSize = size + "px";
+      }
+      setHeadlineFontSize(size - 1);
+    };
+    fit();
+    window.addEventListener("resize", fit);
+    return () => window.removeEventListener("resize", fit);
+  }, [step]);
+
+  useEffect(() => {
+    const cookies = document.cookie.split(";").find(c => c.trim().startsWith("entrySong="));
+    if (cookies) {
+      const song = decodeURIComponent(cookies.split("=").slice(1).join("="));
+      setEntrySong(JSON.parse(song));
+    }
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) setUserId(user.id);
+    };
+    getUser();
   }, []);
 
   const handleSubmit = async () => {
@@ -27,132 +56,353 @@ export default function Onboarding() {
 
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
-      .insert([{ screenname, age_range: ageRange, gender }])
+      .insert([{ screenname, age_range: ageRange, gender, user_id: userId }])
       .select()
       .single();
 
     if (profileError) {
-      console.error(profileError);
+      console.error("Profile error:", profileError);
       setLoading(false);
       return;
     }
 
     if (entrySong && profile) {
-      navigator.geolocation.getCurrentPosition(
-        async (pos) => {
-          await supabase.from("songs").insert([{
-            song_name: entrySong.title,
-            artist: entrySong.artist,
-            profile_id: profile.id,
-            latitude: pos.coords.latitude,
-            longitude: pos.coords.longitude,
-          }]);
-          sessionStorage.removeItem("entrySong");
-          router.push("/map");
-        },
-        async () => {
-          await supabase.from("songs").insert([{
-            song_name: entrySong.title,
-            artist: entrySong.artist,
-            profile_id: profile.id,
-            latitude: 40.7128 + (Math.random() - 0.5) * 0.05,
-            longitude: -74.006 + (Math.random() - 0.5) * 0.05,
-          }]);
-          sessionStorage.removeItem("entrySong");
-          router.push("/map");
+      const saveSong = async (lat: number, lng: number) => {
+        const { error: songError } = await supabase.from("songs").insert([{
+          song_name: entrySong.title,
+          artist: entrySong.artist,
+          profile_id: profile.id,
+          latitude: lat,
+          longitude: lng,
+          cover_art: entrySong.coverArt,
+          preview_url: entrySong.previewUrl,
+          spotify_id: entrySong.spotifyId,
+        }]);
+
+        if (songError) {
+          console.error("Song save error:", songError);
         }
-      );
+
+        document.cookie = "entrySong=; path=/; max-age=0";
+        router.push("/map");
+      };
+
+      const locationPromise = new Promise<{ lat: number; lng: number }>((resolve) => {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+          () => resolve({
+            lat: 40.7128 + (Math.random() - 0.5) * 0.05,
+            lng: -74.006 + (Math.random() - 0.5) * 0.05,
+          }),
+          { timeout: 5000 }
+        );
+      });
+
+      const { lat, lng } = await locationPromise;
+      await saveSong(lat, lng);
     } else {
+      document.cookie = "entrySong=; path=/; max-age=0";
       router.push("/map");
     }
   };
 
+  const accent = "#c0392b";
+  const accentGlow = "rgba(192,57,43,0.4)";
+  const accentDim = "rgba(192,57,43,0.2)";
+  const accentFaint = "rgba(192,57,43,0.08)";
+
+  const headlines: Record<number, string> = {
+    1: "What should we call your collection?",
+    2: "How old are you?",
+    3: "How do you identify?",
+  };
+
   return (
-    <main className="min-h-screen bg-black text-white flex flex-col items-center justify-center px-6">
-      <div className="max-w-xl w-full space-y-8">
-        <h1 className="text-sm tracking-widest text-zinc-400 uppercase">
-          friend of a friend
-        </h1>
+    <>
+      <style>{`
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(18px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        .fade-up { animation: fadeUp 0.7s ease both; }
+        .fade-up-1 { animation-delay: 0.05s; }
+        .fade-up-2 { animation-delay: 0.15s; }
+        .fade-up-3 { animation-delay: 0.25s; }
 
-        {entrySong && (
-          <div className="flex items-center gap-3 p-3 border border-zinc-800 bg-zinc-900">
-            <div>
-              <p className="text-xs text-zinc-500">your entry song</p>
-              <p className="text-sm text-white">{entrySong.title}</p>
-              <p className="text-xs text-zinc-500">{entrySong.artist}</p>
+        .pill-input-wrapper {
+          display: flex;
+          align-items: center;
+          border: 1px solid rgba(192,57,43,0.3);
+          border-radius: 999px;
+          padding: 0.6rem 0.6rem 0.6rem 1.5rem;
+          min-height: 3.2rem;
+          transition: border-color 0.2s, box-shadow 0.2s;
+          background: transparent;
+          width: 100%;
+        }
+        .pill-input-wrapper:focus-within {
+          border-color: ${accent};
+          box-shadow: 0 0 14px ${accentGlow}, inset 0 0 8px rgba(192,57,43,0.04);
+        }
+
+        .pill-input {
+          flex: 1;
+          background: transparent;
+          border: none;
+          color: ${accent};
+          font-size: 0.78rem;
+          font-family: var(--font-dm-mono), monospace;
+          letter-spacing: 0.06em;
+          outline: none;
+          caret-color: ${accent};
+          min-width: 0;
+          padding: 0.4rem 0;
+        }
+        .pill-input::placeholder { color: rgba(192,57,43,0.35); }
+
+        .pill-btn-full {
+          width: 100%;
+          border-radius: 999px;
+          border: 1px solid ${accent};
+          font-family: var(--font-dm-mono), monospace;
+          font-size: 0.72rem;
+          letter-spacing: 0.2em;
+          text-transform: uppercase;
+          padding: 0.9rem 1rem;
+          min-height: 3.2rem;
+          cursor: pointer;
+          transition: all 0.25s;
+        }
+        .pill-btn-full.active {
+          background: ${accent};
+          color: #080808;
+          box-shadow: 0 0 24px ${accentGlow}, 0 0 60px rgba(192,57,43,0.15);
+        }
+        .pill-btn-full.inactive {
+          background: transparent;
+          color: rgba(192,57,43,0.3);
+          cursor: default;
+          border-color: rgba(192,57,43,0.15);
+        }
+        .pill-btn-full.active:hover {
+          background: #a93226;
+          box-shadow: 0 0 36px ${accentGlow};
+        }
+
+        .option-btn {
+          border-radius: 999px;
+          border: 1px solid rgba(192,57,43,0.25);
+          background: transparent;
+          color: rgba(192,57,43,0.55);
+          font-family: var(--font-dm-mono), monospace;
+          font-size: 0.72rem;
+          letter-spacing: 0.1em;
+          padding: 0.85rem 1rem;
+          cursor: pointer;
+          transition: all 0.2s;
+          text-transform: lowercase;
+        }
+        .option-btn:hover {
+          border-color: ${accent};
+          color: ${accent};
+        }
+        .option-btn.selected {
+          background: ${accent};
+          color: #080808;
+          border-color: ${accent};
+          box-shadow: 0 0 16px ${accentGlow};
+        }
+
+        .rule {
+          width: 100%;
+          height: 1px;
+          background: linear-gradient(90deg, ${accent} 0%, transparent 100%);
+          box-shadow: 0 0 8px ${accentGlow};
+          margin-bottom: 2rem;
+        }
+
+        .grain {
+          position: fixed;
+          inset: 0;
+          pointer-events: none;
+          z-index: 9999;
+          opacity: 0.06;
+          mix-blend-mode: overlay;
+          background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        }
+
+        .light-leak {
+          position: fixed;
+          inset: 0;
+          pointer-events: none;
+          z-index: 0;
+          background:
+            radial-gradient(ellipse 50% 55% at -5% 100%, rgba(160,30,15,0.45) 0%, transparent 65%),
+            radial-gradient(ellipse 35% 35% at 105% 0%, rgba(140,20,10,0.3) 0%, transparent 60%);
+        }
+      `}</style>
+
+      <div className="grain" />
+      <div className="light-leak" />
+
+      <main style={{
+        minHeight: "100vh",
+        backgroundColor: "#060404",
+        color: accent,
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        padding: "3rem max(1.5rem, 5vw)",
+        fontFamily: "var(--font-dm-mono), monospace",
+        position: "relative",
+        overflow: "hidden",
+      }}>
+        <div ref={containerRef} style={{ width: "100%", maxWidth: "1100px", margin: "0 auto", position: "relative", zIndex: 1 }}>
+
+          <div className="rule fade-up fade-up-1" />
+
+          <p className="fade-up fade-up-1" style={{
+            fontSize: "0.6rem",
+            letterSpacing: "0.28em",
+            textTransform: "uppercase",
+            color: accent,
+            opacity: 0.55,
+            marginBottom: "1.5rem",
+          }}>
+            Friend of a Friend™
+          </p>
+
+          {entrySong && (
+            <div className="fade-up fade-up-1" style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.75rem",
+              border: "1px solid " + accentDim,
+              borderRadius: "999px",
+              padding: "0.4rem 1rem 0.4rem 0.4rem",
+              background: accentFaint,
+              marginBottom: "2rem",
+            }}>
+              {entrySong.coverArt && (
+                <img src={entrySong.coverArt} alt="" style={{ width: 32, height: 32, objectFit: "cover", borderRadius: "999px" }} />
+              )}
+              <div>
+                <p style={{ fontSize: "0.58rem", color: "rgba(192,57,43,0.45)", letterSpacing: "0.08em", textTransform: "uppercase" }}>your entry song</p>
+                <p style={{ fontSize: "0.72rem", color: accent }}>{entrySong.title} — {entrySong.artist}</p>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {step === 1 && (
-          <div className="space-y-6">
-            <p className="text-3xl font-light">What should we call you?</p>
-            <input
-              type="text"
-              placeholder="screenname..."
-              value={screenname}
-              onChange={(e) => setScreenname(e.target.value)}
-              className="w-full bg-zinc-900 border border-zinc-700 text-white placeholder-zinc-600 px-4 py-3 text-sm focus:outline-none focus:border-white transition"
-            />
-            <button
-              onClick={() => setStep(2)}
-              disabled={!screenname}
-              className="w-full bg-white text-black text-sm py-3 hover:bg-zinc-200 transition disabled:opacity-30"
+          <div style={{ width: "100%", paddingBottom: "0.2em", marginBottom: "2rem" }}>
+            <h1
+              ref={headlineRef}
+              className="fade-up fade-up-2"
+              style={{
+                fontFamily: "var(--font-playfair), serif",
+                fontStyle: "italic",
+                fontWeight: 400,
+                lineHeight: 1.15,
+                color: accent,
+                textShadow: "0 0 40px " + accentGlow + ", 0 0 100px rgba(192,57,43,0.12)",
+                letterSpacing: "-0.01em",
+                fontSize: "clamp(2rem, 3.8vw, 4rem)",
+                margin: 0,
+                padding: "0 0 0.15em 0",
+                overflow: "visible",
+              }}
             >
-              next
-            </button>
+              {headlines[step]}
+            </h1>
           </div>
-        )}
 
-        {step === 2 && (
-          <div className="space-y-6">
-            <p className="text-3xl font-light">How old are you?</p>
-            <div className="grid grid-cols-2 gap-3">
-              {["18–24", "25–32", "33–40", "41+"].map((range) => (
+          <div className="fade-up fade-up-3" style={{ display: "flex", flexDirection: "column", gap: "1rem", width: "100%" }}>
+
+            {step === 1 && (
+              <>
+                <div className="pill-input-wrapper">
+                  <input
+                    type="text"
+                    placeholder="collection name..."
+                    value={screenname}
+                    onChange={(e) => setScreenname(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && screenname && setStep(2)}
+                    className="pill-input"
+                  />
+                </div>
                 <button
-                  key={range}
-                  onClick={() => setAgeRange(range)}
-                  className={`py-3 text-sm border transition ${ageRange === range ? "bg-white text-black border-white" : "border-zinc-700 text-zinc-400 hover:border-white hover:text-white"}`}
+                  onClick={() => setStep(2)}
+                  disabled={!screenname}
+                  className={"pill-btn-full " + (screenname ? "active" : "inactive")}
                 >
-                  {range}
+                  next →
                 </button>
-              ))}
-            </div>
-            <button
-              onClick={() => setStep(3)}
-              disabled={!ageRange}
-              className="w-full bg-white text-black text-sm py-3 hover:bg-zinc-200 transition disabled:opacity-30"
-            >
-              next
-            </button>
-          </div>
-        )}
+              </>
+            )}
 
-        {step === 3 && (
-          <div className="space-y-6">
-            <p className="text-3xl font-light">How do you identify?</p>
-            <p className="text-zinc-500 text-sm">optional</p>
-            <div className="grid grid-cols-2 gap-3">
-              {["woman", "man", "non-binary", "prefer not to say"].map((g) => (
+            {step === 2 && (
+              <>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+                  {["18–24", "25–32", "33–40", "41+"].map((range) => (
+                    <button
+                      key={range}
+                      onClick={() => setAgeRange(range)}
+                      className={"option-btn " + (ageRange === range ? "selected" : "")}
+                    >
+                      {range}
+                    </button>
+                  ))}
+                </div>
                 <button
-                  key={g}
-                  onClick={() => setGender(g)}
-                  className={`py-3 text-sm border transition ${gender === g ? "bg-white text-black border-white" : "border-zinc-700 text-zinc-400 hover:border-white hover:text-white"}`}
+                  onClick={() => setStep(3)}
+                  disabled={!ageRange}
+                  className={"pill-btn-full " + (ageRange ? "active" : "inactive")}
                 >
-                  {g}
+                  next →
                 </button>
-              ))}
-            </div>
-            <button
-              onClick={handleSubmit}
-              disabled={loading}
-              className="w-full bg-white text-black text-sm py-3 hover:bg-zinc-200 transition disabled:opacity-30"
-            >
-              {loading ? "saving..." : "enter the map"}
-            </button>
+              </>
+            )}
+
+            {step === 3 && (
+              <>
+                <p style={{ fontSize: "0.65rem", color: "rgba(192,57,43,0.35)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+                  optional
+                </p>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+                  {["woman", "man", "non-binary", "prefer not to say"].map((g) => (
+                    <button
+                      key={g}
+                      onClick={() => setGender(g)}
+                      className={"option-btn " + (gender === g ? "selected" : "")}
+                    >
+                      {g}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={handleSubmit}
+                  disabled={loading}
+                  className={"pill-btn-full " + (!loading ? "active" : "inactive")}
+                >
+                  {loading ? "saving···" : "enter the neighborhood →"}
+                </button>
+              </>
+            )}
           </div>
-        )}
-      </div>
-    </main>
+
+          <div style={{ display: "flex", gap: "0.4rem", marginTop: "2.5rem" }}>
+            {[1, 2, 3].map((s) => (
+              <div key={s} style={{
+                width: s === step ? "1.5rem" : "0.4rem",
+                height: "0.4rem",
+                borderRadius: "999px",
+                background: s === step ? accent : "rgba(192,57,43,0.2)",
+                transition: "all 0.3s",
+              }} />
+            ))}
+          </div>
+
+        </div>
+      </main>
+    </>
   );
 }
