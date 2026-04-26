@@ -220,7 +220,7 @@ export default function Welcome() {
                 <div className="search-pill-wrapper">
                   <input
                     type="email"
-                    placeholder="your email..."
+                    placeholder="Your email..."
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleMagicLink()}
@@ -233,7 +233,7 @@ export default function Welcome() {
                   disabled={loading || !email}
                   className={`pill-btn-full ${email && !loading ? "active" : "inactive"}`}
                 >
-                  {loading ? "sending···" : "send magic link →"}
+                  {loading ? "Sending···" : "Send Magic Link →"}
                 </button>
               </div>
             </>
@@ -250,7 +250,7 @@ export default function Welcome() {
                 padding: "0 0 0.15em 0",
                 whiteSpace: "nowrap",
               }}>
-                check your email.
+                Check Your Email.
               </h1>
               <p style={{
                 fontSize: "0.75rem",
@@ -258,8 +258,8 @@ export default function Welcome() {
                 letterSpacing: "0.04em",
                 lineHeight: 1.85,
               }}>
-                we sent a link to <span style={{ color: accent }}>{email}</span>.<br />
-                click it to enter.
+                We sent a link to <span style={{ color: accent }}>{email}</span>.<br />
+                Click it to enter.
               </p>
             </div>
           )}
