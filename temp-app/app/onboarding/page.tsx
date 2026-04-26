@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
 
@@ -17,26 +17,6 @@ export default function Onboarding() {
   const [loading, setLoading] = useState(false);
   const [entrySong, setEntrySong] = useState<any>(null);
   const [userId, setUserId] = useState<string | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const headlineRef = useRef<HTMLHeadingElement>(null);
-  const [headlineFontSize, setHeadlineFontSize] = useState(64);
-
-  useEffect(() => {
-    const fit = () => {
-      if (!containerRef.current || !headlineRef.current) return;
-      const containerWidth = containerRef.current.offsetWidth;
-      let size = 16;
-      headlineRef.current.style.fontSize = size + "px";
-      while (headlineRef.current.scrollWidth <= containerWidth && size < 200) {
-        size++;
-        headlineRef.current.style.fontSize = size + "px";
-      }
-      setHeadlineFontSize(size - 1);
-    };
-    fit();
-    window.addEventListener("resize", fit);
-    return () => window.removeEventListener("resize", fit);
-  }, [step]);
 
   useEffect(() => {
     const cookies = document.cookie.split(";").find(c => c.trim().startsWith("entrySong="));
@@ -78,11 +58,7 @@ export default function Onboarding() {
           preview_url: entrySong.previewUrl,
           spotify_id: entrySong.spotifyId,
         }]);
-
-        if (songError) {
-          console.error("Song save error:", songError);
-        }
-
+        if (songError) console.error("Song save error:", songError);
         document.cookie = "entrySong=; path=/; max-age=0";
         router.push("/map");
       };
@@ -257,7 +233,7 @@ export default function Onboarding() {
         position: "relative",
         overflow: "hidden",
       }}>
-        <div ref={containerRef} style={{ width: "100%", maxWidth: "1100px", margin: "0 auto", position: "relative", zIndex: 1 }}>
+        <div style={{ width: "100%", maxWidth: "1100px", margin: "0 auto", position: "relative", zIndex: 1 }}>
 
           <div className="rule fade-up fade-up-1" />
 
@@ -295,7 +271,6 @@ export default function Onboarding() {
 
           <div style={{ width: "100%", paddingBottom: "0.2em", marginBottom: "2rem" }}>
             <h1
-              ref={headlineRef}
               className="fade-up fade-up-2"
               style={{
                 fontFamily: "var(--font-playfair), serif",
@@ -305,7 +280,7 @@ export default function Onboarding() {
                 color: accent,
                 textShadow: "0 0 40px " + accentGlow + ", 0 0 100px rgba(192,57,43,0.12)",
                 letterSpacing: "-0.01em",
-                fontSize: "clamp(2rem, 3.8vw, 4rem)",
+                fontSize: "clamp(1.8rem, 3.5vw, 3.8rem)",
                 margin: 0,
                 padding: "0 0 0.15em 0",
                 overflow: "visible",
@@ -316,7 +291,6 @@ export default function Onboarding() {
           </div>
 
           <div className="fade-up fade-up-3" style={{ display: "flex", flexDirection: "column", gap: "1rem", width: "100%" }}>
-
             {step === 1 && (
               <>
                 <div className="pill-input-wrapper">
@@ -400,7 +374,6 @@ export default function Onboarding() {
               }} />
             ))}
           </div>
-
         </div>
       </main>
     </>
