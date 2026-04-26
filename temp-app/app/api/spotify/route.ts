@@ -18,8 +18,8 @@ export async function GET(request: NextRequest) {
 
   if (!query) return NextResponse.json({ error: "no query" }, { status: 400 });
 
-  const clientId = process.env.SPOTIFY_CLIENT_ID;
-  const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
+  const clientId = process.env.58117c861721470890e7a62d39006d1e;
+  const clientSecret = process.env.a8cf5429b89c47b0a5c3aaee30cc23ff;
 
   const tokenRes = await fetch("https://accounts.spotify.com/api/token", {
     method: "POST",
