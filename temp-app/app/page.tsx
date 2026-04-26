@@ -197,17 +197,9 @@ export default function Home() {
         }
 
         @media (max-width: 768px) {
-          .search-pill-wrapper {
-            padding: 0.5rem 0.5rem 0.5rem 1.25rem;
-          }
-          .pill-search-btn {
-            padding: 0.6rem 1rem;
-            font-size: 0.62rem;
-          }
-          .pill-btn-full {
-            padding: 0.85rem 1rem;
-            font-size: 0.65rem;
-          }
+          .search-pill-wrapper { padding: 0.5rem 0.5rem 0.5rem 1.25rem; }
+          .pill-search-btn { padding: 0.6rem 1rem; font-size: 0.62rem; }
+          .pill-btn-full { padding: 0.85rem 1rem; font-size: 0.65rem; }
         }
       `}</style>
 
@@ -299,14 +291,14 @@ export default function Home() {
                 <div className="search-pill-wrapper">
                   <input
                     type="text"
-                    placeholder="search for a song..."
+                    placeholder="Search for a song..."
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && searchSongs()}
                     className="pill-input"
                   />
                   <button onClick={searchSongs} className="pill-search-btn">
-                    {loading ? "···" : "search →"}
+                    {loading ? "···" : "Search →"}
                   </button>
                 </div>
 
@@ -369,7 +361,7 @@ export default function Home() {
                   disabled={!selected}
                   className={`pill-btn-full ${selected ? "active" : "inactive"}`}
                 >
-                  enter →
+                  Enter →
                 </button>
 
                 <button
@@ -384,13 +376,12 @@ export default function Home() {
                   onMouseEnter={(e) => (e.currentTarget.style.color = accent)}
                   onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(192,57,43,0.22)")}
                 >
-                  returning? sign in
+                  Returning? Sign In
                 </button>
               </div>
             </>
           ) : (
             <div>
-              <div className="rule fade-up fade-up-1" style={{ marginBottom: "1.5rem" }} />
               <h1 className="fade-up fade-up-2" style={{
                 fontFamily: "var(--font-playfair), serif",
                 fontStyle: "italic",
@@ -402,17 +393,17 @@ export default function Home() {
                 lineHeight: 1.15,
                 padding: "0 0 0.15em 0",
               }}>
-                welcome back.
+                Welcome Back.
               </h1>
 
               {!sent ? (
                 <div className="fade-up fade-up-3" style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
                   <p style={{ fontSize: "0.72rem", color: "rgba(192,57,43,0.45)", letterSpacing: "0.04em" }}>
-                    enter your email to get your link.
+                    Enter your email to get your link.
                   </p>
                   <div className="search-pill-wrapper">
                     <input
-                      type="email" placeholder="your email..."
+                      type="email" placeholder="Your email..."
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       onKeyDown={(e) => e.key === "Enter" && handleLogin()}
@@ -424,7 +415,7 @@ export default function Home() {
                     disabled={loginLoading || !email}
                     className={`pill-btn-full ${email && !loginLoading ? "active" : "inactive"}`}
                   >
-                    {loginLoading ? "sending···" : "send magic link →"}
+                    {loginLoading ? "Sending···" : "Send Magic Link →"}
                   </button>
                   <button
                     onClick={() => setShowLogin(false)}
@@ -436,14 +427,14 @@ export default function Home() {
                     onMouseEnter={(e) => (e.currentTarget.style.color = accent)}
                     onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(192,57,43,0.22)")}
                   >
-                    ← back
+                    ← Back
                   </button>
                 </div>
               ) : (
                 <div className="fade-up fade-up-3">
-                  <p style={{ fontSize: "0.9rem", color: accent, marginBottom: "0.75rem" }}>check your email.</p>
+                  <p style={{ fontSize: "0.9rem", color: accent, marginBottom: "0.75rem" }}>Check Your Email.</p>
                   <p style={{ fontSize: "0.72rem", color: "rgba(192,57,43,0.45)", letterSpacing: "0.04em" }}>
-                    we sent a link to <span style={{ color: accent }}>{email}</span>. click it to enter.
+                    We sent a link to <span style={{ color: accent }}>{email}</span>. Click it to enter.
                   </p>
                 </div>
               )}
