@@ -32,7 +32,8 @@ export default function Collection() {
         size++;
         headlineRef.current.style.fontSize = size + "px";
       }
-      setHeadlineFontSize(size - 1);
+      const maxSize = window.innerWidth < 768 ? 64 : size - 1;
+      setHeadlineFontSize(Math.min(size - 1, maxSize));
     };
     if (profile) {
       fit();
@@ -93,7 +94,7 @@ export default function Collection() {
         justifyContent: "center",
         fontFamily: "var(--font-dm-mono), monospace",
       }}>
-        <p style={{ color: "rgba(192,57,43,0.4)", fontSize: "0.75rem", letterSpacing: "0.1em" }}>loading...</p>
+        <p style={{ color: "rgba(192,57,43,0.4)", fontSize: "0.75rem", letterSpacing: "0.1em" }}>Loading...</p>
       </main>
     </>
   );
@@ -138,7 +139,6 @@ export default function Collection() {
           padding: 0.75rem;
           text-align: center;
           transition: border-color 0.2s, background 0.2s;
-          cursor: default;
         }
         .collection-card:hover {
           border-color: rgba(192,57,43,0.3);
@@ -148,9 +148,17 @@ export default function Collection() {
         .rule {
           width: 100%;
           height: 1px;
-          background: linear-gradient(90deg, ${ACCENT} 0%, transparent 100%);
-          box-shadow: 0 0 8px ${ACCENT_GLOW};
+          background: linear-gradient(90deg, #c0392b 0%, transparent 100%);
+          box-shadow: 0 0 8px rgba(192,57,43,0.4);
           margin-bottom: 2rem;
+        }
+
+        .section-label {
+          font-size: 0.58rem;
+          letter-spacing: 0.2em;
+          text-transform: uppercase;
+          color: rgba(192,57,43,0.4);
+          margin-bottom: 1rem;
         }
 
         .grain {
@@ -172,14 +180,6 @@ export default function Collection() {
             radial-gradient(ellipse 50% 55% at -5% 100%, rgba(160,30,15,0.45) 0%, transparent 65%),
             radial-gradient(ellipse 35% 35% at 105% 0%, rgba(140,20,10,0.3) 0%, transparent 60%);
         }
-
-        .section-label {
-          font-size: 0.58rem;
-          letter-spacing: 0.2em;
-          text-transform: uppercase;
-          color: rgba(192,57,43,0.4);
-          margin-bottom: 1rem;
-        }
       `}</style>
 
       <div className="grain" />
@@ -190,13 +190,12 @@ export default function Collection() {
         backgroundColor: "#060404",
         color: ACCENT,
         fontFamily: "var(--font-dm-mono), monospace",
-        padding: "3rem 5vw",
+        padding: "3rem max(1.5rem, 5vw)",
         position: "relative",
         overflowY: "auto",
       }}>
         <div ref={containerRef} style={{ width: "100%", maxWidth: "1100px", margin: "0 auto", position: "relative", zIndex: 1 }}>
 
-          {/* Top rule */}
           <div className="rule fade-up fade-up-1" />
 
           {/* Nav row */}
@@ -230,11 +229,11 @@ export default function Collection() {
               onMouseEnter={(e) => (e.currentTarget.style.color = ACCENT)}
               onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(192,57,43,0.35)")}
             >
-              ← the neighborhood
+              ← The Neighborhood
             </button>
           </div>
 
-          {/* Headline — fitted to container */}
+          {/* Headline */}
           <div style={{ width: "100%", paddingBottom: "0.2em", marginBottom: "0.75rem" }}>
             <h1
               ref={headlineRef}
@@ -270,10 +269,10 @@ export default function Collection() {
 
           {/* Songs dropped */}
           <div className="fade-up fade-up-3" style={{ marginBottom: "3rem" }}>
-            <p className="section-label">songs you've dropped</p>
+            <p className="section-label">Songs You've Dropped</p>
             {songs.length === 0 ? (
               <p style={{ fontSize: "0.72rem", color: "rgba(192,57,43,0.3)", letterSpacing: "0.04em" }}>
-                no songs dropped yet
+                No songs dropped yet.
               </p>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
@@ -296,10 +295,10 @@ export default function Collection() {
 
           {/* Collection */}
           <div className="fade-up fade-up-4" style={{ marginBottom: "3rem" }}>
-            <p className="section-label">your collection</p>
+            <p className="section-label">Your Collection</p>
             {collected.length === 0 ? (
               <p style={{ fontSize: "0.72rem", color: "rgba(192,57,43,0.3)", letterSpacing: "0.04em" }}>
-                collect songs from the neighborhood to fill your collection
+                Collect songs from the neighborhood to fill your collection.
               </p>
             ) : (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: "0.75rem" }}>
@@ -341,7 +340,7 @@ export default function Collection() {
             onMouseEnter={(e) => (e.currentTarget.style.color = ACCENT)}
             onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(192,57,43,0.25)")}
           >
-            sign out
+            Sign Out
           </button>
 
         </div>

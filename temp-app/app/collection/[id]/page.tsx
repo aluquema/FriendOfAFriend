@@ -34,7 +34,8 @@ export default function OtherCollection({ params }: { params: Promise<{ id: stri
         size++;
         headlineRef.current.style.fontSize = size + "px";
       }
-      setHeadlineFontSize(size - 1);
+      const maxSize = window.innerWidth < 768 ? 64 : size - 1;
+      setHeadlineFontSize(Math.min(size - 1, maxSize));
     };
     if (profile) {
       fit();
@@ -89,7 +90,7 @@ export default function OtherCollection({ params }: { params: Promise<{ id: stri
       }]);
     }
     setCollecting(null);
-    alert("song collected!");
+    alert("Song Collected!");
   };
 
   if (!profile) return (
@@ -114,7 +115,7 @@ export default function OtherCollection({ params }: { params: Promise<{ id: stri
         justifyContent: "center",
         fontFamily: "var(--font-dm-mono), monospace",
       }}>
-        <p style={{ color: "rgba(192,57,43,0.4)", fontSize: "0.75rem", letterSpacing: "0.1em" }}>loading...</p>
+        <p style={{ color: "rgba(192,57,43,0.4)", fontSize: "0.75rem", letterSpacing: "0.1em" }}>Loading...</p>
       </main>
     </>
   );
@@ -235,7 +236,7 @@ export default function OtherCollection({ params }: { params: Promise<{ id: stri
         backgroundColor: "#060404",
         color: ACCENT,
         fontFamily: "var(--font-dm-mono), monospace",
-        padding: "3rem 5vw",
+        padding: "3rem max(1.5rem, 5vw)",
         position: "relative",
         overflowY: "auto",
       }}>
@@ -274,7 +275,7 @@ export default function OtherCollection({ params }: { params: Promise<{ id: stri
               onMouseEnter={(e) => (e.currentTarget.style.color = ACCENT)}
               onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(192,57,43,0.35)")}
             >
-              ← the neighborhood
+              ← The Neighborhood
             </button>
           </div>
 
@@ -314,10 +315,10 @@ export default function OtherCollection({ params }: { params: Promise<{ id: stri
 
           {/* Songs dropped */}
           <div className="fade-up fade-up-3" style={{ marginBottom: "3rem" }}>
-            <p className="section-label">songs dropped</p>
+            <p className="section-label">Songs Dropped</p>
             {songs.length === 0 ? (
               <p style={{ fontSize: "0.72rem", color: "rgba(192,57,43,0.3)", letterSpacing: "0.04em" }}>
-                no songs dropped yet
+                No songs dropped yet.
               </p>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
@@ -337,7 +338,7 @@ export default function OtherCollection({ params }: { params: Promise<{ id: stri
                       disabled={collecting === song.id}
                       className="collect-btn"
                     >
-                      {collecting === song.id ? "···" : "collect"}
+                      {collecting === song.id ? "···" : "Collect"}
                     </button>
                   </div>
                 ))}
@@ -347,10 +348,10 @@ export default function OtherCollection({ params }: { params: Promise<{ id: stri
 
           {/* Their collection */}
           <div className="fade-up fade-up-4" style={{ marginBottom: "3rem" }}>
-            <p className="section-label">their collection</p>
+            <p className="section-label">Their Collection</p>
             {collected.length === 0 ? (
               <p style={{ fontSize: "0.72rem", color: "rgba(192,57,43,0.3)", letterSpacing: "0.04em" }}>
-                nothing collected yet
+                Nothing collected yet.
               </p>
             ) : (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: "0.75rem" }}>
@@ -372,7 +373,7 @@ export default function OtherCollection({ params }: { params: Promise<{ id: stri
                       className="collect-btn"
                       style={{ marginTop: "0.5rem" }}
                     >
-                      collect
+                      Collect
                     </button>
                   </div>
                 ))}

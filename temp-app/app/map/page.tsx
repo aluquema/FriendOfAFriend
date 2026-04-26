@@ -39,7 +39,7 @@ export default function Map() {
           profile_id: profiles[0].id,
           song_id: songId,
         }]);
-        alert("song collected!");
+        alert("Song collected!");
       }
     };
   }, []);
@@ -63,10 +63,10 @@ export default function Map() {
               '<div style="background:#0a0404;color:#c0392b;font-family:monospace;width:180px;border:1px solid rgba(192,57,43,0.3);">' +
               (song.cover_art ? '<img src="' + song.cover_art + '" style="width:100%;height:180px;object-fit:cover;display:block;opacity:0.9;" />' : '') +
               '<div style="padding:10px;">' +
-              '<a href="/collection/' + song.profiles?.id + '" style="font-size:9px;color:rgba(192,57,43,0.5);margin:0 0 4px;text-transform:uppercase;letter-spacing:0.1em;text-decoration:none;display:block;">' + (song.profiles?.screenname || "anonymous") + ' -&gt;</a>' +
+              '<a href="/collection/' + song.profiles?.id + '" style="font-size:9px;color:rgba(192,57,43,0.5);margin:0 0 4px;text-transform:uppercase;letter-spacing:0.1em;text-decoration:none;display:block;">' + (song.profiles?.screenname || "Anonymous") + ' -&gt;</a>' +
               '<p style="font-size:12px;margin:4px 0 2px;color:#c0392b;">' + song.song_name + '</p>' +
               '<p style="font-size:10px;color:rgba(192,57,43,0.5);margin:0 0 10px">' + song.artist + '</p>' +
-              '<button onclick="window.collectSong(' + song.id + ')" style="width:100%;background:#c0392b;color:#080808;border:none;padding:7px 0;font-size:10px;cursor:pointer;letter-spacing:0.1em;font-family:monospace;text-transform:uppercase;border-radius:999px;">collect</button>' +
+              '<button onclick="window.collectSong(' + song.id + ')" style="width:100%;background:#c0392b;color:#080808;border:none;padding:7px 0;font-size:10px;cursor:pointer;letter-spacing:0.1em;font-family:monospace;text-transform:uppercase;border-radius:999px;">Collect</button>' +
               '</div>' +
               '</div>'
             );
@@ -223,34 +223,34 @@ export default function Map() {
       <main style={{ width: "100%", height: "100vh", position: "relative", backgroundColor: "#060404" }}>
 
         {/* Top bar */}
-<div style={{
-  position: "absolute",
-  top: "1.5rem",
-  left: "1.5rem",
-  zIndex: 10,
-}}>
-  <p style={{
-    fontFamily: "var(--font-playfair), serif",
-    fontStyle: "italic",
-    fontSize: "1.8rem",
-    fontWeight: 400,
-    color: ACCENT,
-    textShadow: "0 0 20px rgba(192,57,43,0.4)",
-    lineHeight: 1,
-    marginBottom: "0.25rem",
-  }}>
-    Friend of a Friend
-  </p>
-  <p style={{
-    fontFamily: "var(--font-dm-mono), monospace",
-    fontSize: "0.6rem",
-    color: "rgba(192,57,43,0.35)",
-    letterSpacing: "0.15em",
-    textTransform: "uppercase",
-  }}>
-    The Neighborhood
-  </p>
-</div>
+        <div style={{
+          position: "absolute",
+          top: "1.5rem",
+          left: "1.5rem",
+          zIndex: 10,
+        }}>
+          <p style={{
+            fontFamily: "var(--font-playfair), serif",
+            fontStyle: "italic",
+            fontSize: "clamp(1rem, 3vw, 1.8rem)",
+            fontWeight: 400,
+            color: ACCENT,
+            textShadow: "0 0 20px rgba(192,57,43,0.4)",
+            lineHeight: 1,
+            marginBottom: "0.25rem",
+          }}>
+            Friend of a Friend
+          </p>
+          <p style={{
+            fontFamily: "var(--font-dm-mono), monospace",
+            fontSize: "0.6rem",
+            color: "rgba(192,57,43,0.35)",
+            letterSpacing: "0.15em",
+            textTransform: "uppercase",
+          }}>
+            The Neighborhood
+          </p>
+        </div>
 
         {/* Bottom right buttons */}
         <div style={{
@@ -278,7 +278,7 @@ export default function Map() {
               fontFamily: "var(--font-dm-mono), monospace",
             }}
           >
-            drop a song
+            Drop a Song
           </button>
           <button
             onClick={() => router.push("/collection")}
@@ -295,7 +295,7 @@ export default function Map() {
               cursor: "pointer",
             }}
           >
-            my collection
+            My Collection
           </button>
         </div>
 
@@ -317,7 +317,7 @@ export default function Map() {
           }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
               <p style={{ fontSize: "0.65rem", color: ACCENT, letterSpacing: "0.15em", textTransform: "uppercase" }}>
-                drop a song here
+                Drop a Song Here
               </p>
               <button
                 onClick={() => { setShowDrop(false); setSelected(null); setResults([]); setQuery(""); }}
@@ -332,14 +332,14 @@ export default function Map() {
                 <div className="map-pill-wrapper" style={{ marginBottom: "0.75rem" }}>
                   <input
                     type="text"
-                    placeholder="search for a song..."
+                    placeholder="Search for a song..."
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && searchSongs()}
                     className="map-pill-input"
                   />
                   <button onClick={searchSongs} className="map-pill-search-btn">
-                    {searching ? "···" : "go"}
+                    {searching ? "···" : "Go"}
                   </button>
                 </div>
 
@@ -402,7 +402,7 @@ export default function Map() {
                     transition: "all 0.2s",
                   }}
                 >
-                  {dropping ? "dropping···" : "pin it here"}
+                  {dropping ? "Dropping···" : "Pin It Here"}
                 </button>
               </div>
             )}

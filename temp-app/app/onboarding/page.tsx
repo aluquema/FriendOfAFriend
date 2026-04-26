@@ -88,9 +88,9 @@ export default function Onboarding() {
   const accentFaint = "rgba(192,57,43,0.08)";
 
   const headlines: Record<number, string> = {
-    1: "What should we call your collection?",
-    2: "How old are you?",
-    3: "How do you identify?",
+    1: "What Should We Call Your Collection?",
+    2: "How Old Are You?",
+    3: "How Do You Identify?",
   };
 
   return (
@@ -176,7 +176,7 @@ export default function Onboarding() {
           padding: 0.85rem 1rem;
           cursor: pointer;
           transition: all 0.2s;
-          text-transform: lowercase;
+          text-transform: capitalize;
         }
         .option-btn:hover {
           border-color: ${accent};
@@ -263,7 +263,7 @@ export default function Onboarding() {
                 <img src={entrySong.coverArt} alt="" style={{ width: 32, height: 32, objectFit: "cover", borderRadius: "999px" }} />
               )}
               <div>
-                <p style={{ fontSize: "0.58rem", color: "rgba(192,57,43,0.45)", letterSpacing: "0.08em", textTransform: "uppercase" }}>your entry song</p>
+                <p style={{ fontSize: "0.58rem", color: "rgba(192,57,43,0.45)", letterSpacing: "0.08em", textTransform: "uppercase" }}>Your Entry Song</p>
                 <p style={{ fontSize: "0.72rem", color: accent }}>{entrySong.title} — {entrySong.artist}</p>
               </div>
             </div>
@@ -296,7 +296,7 @@ export default function Onboarding() {
                 <div className="pill-input-wrapper">
                   <input
                     type="text"
-                    placeholder="collection name..."
+                    placeholder="Collection name..."
                     value={screenname}
                     onChange={(e) => setScreenname(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && screenname && setStep(2)}
@@ -308,7 +308,7 @@ export default function Onboarding() {
                   disabled={!screenname}
                   className={"pill-btn-full " + (screenname ? "active" : "inactive")}
                 >
-                  next →
+                  Next →
                 </button>
               </>
             )}
@@ -331,7 +331,7 @@ export default function Onboarding() {
                   disabled={!ageRange}
                   className={"pill-btn-full " + (ageRange ? "active" : "inactive")}
                 >
-                  next →
+                  Next →
                 </button>
               </>
             )}
@@ -339,10 +339,10 @@ export default function Onboarding() {
             {step === 3 && (
               <>
                 <p style={{ fontSize: "0.65rem", color: "rgba(192,57,43,0.35)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
-                  optional
+                  Optional
                 </p>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
-                  {["woman", "man", "non-binary", "prefer not to say"].map((g) => (
+                  {["Woman", "Man", "Non-Binary", "Prefer Not to Say"].map((g) => (
                     <button
                       key={g}
                       onClick={() => setGender(g)}
@@ -357,7 +357,7 @@ export default function Onboarding() {
                   disabled={loading}
                   className={"pill-btn-full " + (!loading ? "active" : "inactive")}
                 >
-                  {loading ? "saving···" : "enter the neighborhood →"}
+                  {loading ? "Saving···" : "Enter the Neighborhood →"}
                 </button>
               </>
             )}
