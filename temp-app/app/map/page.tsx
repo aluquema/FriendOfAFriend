@@ -56,7 +56,8 @@ export default function Map() {
         container: mapContainer.current!,
         style: "mapbox://styles/aluquema/cmogb5mmw000o01pfhtrxajwd",
         center: [lng, lat],
-        zoom: zoom,
+         zoom: zoom,
+  maxZoom: 15,
       });
 
       map.current.on("load", async () => {
