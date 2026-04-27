@@ -13,7 +13,21 @@ const ACCENT = "#c0392b";
 const ACCENT_DIM = "rgba(192,57,43,0.2)";
 const ACCENT_GLOW = "rgba(192,57,43,0.4)";
 const ACCENT_FAINT = "rgba(192,57,43,0.08)";
-const randomOffset = () => (Math.random() - 0.5) * 0.003;
+const MAPBOX_TOKEN = "pk.eyJ1IjoiYWx1cXVlbWEiLCJhIjoiY21vYnVhdDdyMDVudTJyb3BwbHU2bnJkdCJ9.fkJLuwvSZ12xkYpgyld0dA";
+
+const snapToStreet = async (lat: number, lng: number): Promise<{ lat: number; lng: number }> => {
+  try {
+    const res = await fetch(
+      `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?types=address&access_token=${MAPBOX_TOKEN}`
+    );
+    const data = await res.json();
+    const feature = data.features?.[0];
+    if (feature) {
+      return { lng: feature.center[0], lat: feature.center[1] };
+    }
+  } catch {}
+  return { lat, lng };
+};
 
 export default function Map() {
   const router = useRouter();
@@ -40,7 +54,7 @@ export default function Map() {
           profile_id: profiles[0].id,
           song_id: songId,
         }]);
-        alert("Song collected!");
+        alert("Song Collected!");
       }
     };
   }, []);
@@ -114,12 +128,16 @@ export default function Map() {
     if (!profiles || !profiles[0]) { setDropping(false); return; }
 
     navigator.geolocation.getCurrentPosition(async (pos) => {
+      const snapped = await snapToStreet(pos.coords.latitude, pos.coords.longitude);
+      const lat = snapped.lat;
+      const lng = snapped.lng;
+
       const { data: song } = await supabase.from("songs").insert([{
         song_name: selected.name,
         artist: selected.artists[0].name,
         profile_id: profiles[0].id,
-        latitude: pos.coords.latitude,
-        longitude: pos.coords.longitude,
+        latitude: lat,
+        longitude: lng,
         cover_art: selected.album.images[1]?.url,
         spotify_id: selected.id,
       }]).select().single();
@@ -142,7 +160,7 @@ export default function Map() {
         el.style.backgroundColor = ACCENT;
         el.style.boxShadow = "0 0 8px " + ACCENT_GLOW + ", 0 0 16px " + ACCENT_GLOW;
         el.style.cursor = "pointer";
-        new mapboxgl.Marker(el).setLngLat([pos.coords.longitude, pos.coords.latitude]).setPopup(popup).addTo(map.current);
+        new mapboxgl.Marker(el).setLngLat([lng, lat]).setPopup(popup).addTo(map.current);
       }
 
       setShowDrop(false);
@@ -223,7 +241,6 @@ export default function Map() {
 
       <main style={{ width: "100%", height: "100vh", position: "relative", backgroundColor: "#060404" }}>
 
-        {/* Top bar */}
         <div style={{
           position: "absolute",
           top: "1.5rem",
@@ -253,7 +270,6 @@ export default function Map() {
           </p>
         </div>
 
-        {/* Bottom right buttons */}
         <div style={{
           position: "absolute",
           bottom: "1.5rem",
@@ -300,7 +316,6 @@ export default function Map() {
           </button>
         </div>
 
-        {/* Drop panel */}
         {showDrop && (
           <div style={{
             position: "absolute",

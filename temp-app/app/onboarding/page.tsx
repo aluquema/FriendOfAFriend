@@ -8,7 +8,21 @@ const supabase = createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRtemNheHJxdHRibGZyeXRlbmFlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4OTU5NTgsImV4cCI6MjA5MjQ3MTk1OH0.3lYKH-FZc8n-FUdnffUvKP294c72mAEzOV93iqb2rxM"
 );
 
-const randomOffset = () => (Math.random() - 0.5) * 0.003;
+const MAPBOX_TOKEN = "pk.eyJ1IjoiYWx1cXVlbWEiLCJhIjoiY21vYnVhdDdyMDVudTJyb3BwbHU2bnJkdCJ9.fkJLuwvSZ12xkYpgyld0dA";
+
+const snapToStreet = async (lat: number, lng: number): Promise<{ lat: number; lng: number }> => {
+  try {
+    const res = await fetch(
+      `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?types=address&access_token=${MAPBOX_TOKEN}`
+    );
+    const data = await res.json();
+    const feature = data.features?.[0];
+    if (feature) {
+      return { lng: feature.center[0], lat: feature.center[1] };
+    }
+  } catch {}
+  return { lat, lng };
+};
 
 export default function Onboarding() {
   const router = useRouter();
@@ -50,12 +64,13 @@ export default function Onboarding() {
 
     if (entrySong && profile) {
       const saveSong = async (lat: number, lng: number) => {
+        const snapped = await snapToStreet(lat, lng);
         const { error: songError } = await supabase.from("songs").insert([{
           song_name: entrySong.title,
           artist: entrySong.artist,
           profile_id: profile.id,
-          latitude: lat,
-          longitude: lng,
+          latitude: snapped.lat,
+          longitude: snapped.lng,
           cover_art: entrySong.coverArt,
           preview_url: entrySong.previewUrl,
           spotify_id: entrySong.spotifyId,
@@ -67,14 +82,8 @@ export default function Onboarding() {
 
       const locationPromise = new Promise<{ lat: number; lng: number }>((resolve) => {
         navigator.geolocation.getCurrentPosition(
-          (pos) => resolve({
-            lat: pos.coords.latitude + randomOffset(),
-            lng: pos.coords.longitude + randomOffset(),
-          }),
-          () => resolve({
-            lat: 40.7128 + randomOffset(),
-            lng: -74.006 + randomOffset(),
-          }),
+          (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+          () => resolve({ lat: 40.7128, lng: -74.006 }),
           { timeout: 5000 }
         );
       });
