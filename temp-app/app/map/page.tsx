@@ -161,7 +161,7 @@ export default function Map() {
     }, () => setDropping(false));
   };
 
-  return (
+ return (
     <>
       <style>{`
         .map-pill-wrapper {
@@ -247,7 +247,7 @@ export default function Map() {
 
       <div className="grain" />
 
-      <main style={{ width: "100%", height: "100vh", position: "relative", backgroundColor: "#060404" }}>
+      <main style={{ width: "100%", height: "100dvh", position: "relative", backgroundColor: "#060404" }}>
 
         <div style={{
           position: "absolute",
@@ -280,7 +280,7 @@ export default function Map() {
 
         <div style={{
           position: "absolute",
-          bottom: "5rem",
+          bottom: "1.5rem",
           right: "1.5rem",
           zIndex: 10,
           display: "flex",
@@ -327,10 +327,10 @@ export default function Map() {
         {showDrop && (
           <div style={{
             position: "absolute",
-            bottom: "9rem",
+            bottom: "5rem",
             right: "1.5rem",
             zIndex: 20,
-            width: "320px",
+            width: "min(320px, calc(100vw - 3rem))",
             background: "rgba(6,4,4,0.95)",
             border: "1px solid " + ACCENT_DIM,
             borderRadius: "16px",
@@ -338,6 +338,8 @@ export default function Map() {
             backdropFilter: "blur(12px)",
             boxShadow: "0 0 40px rgba(192,57,43,0.15)",
             fontFamily: "var(--font-dm-mono), monospace",
+            maxHeight: "calc(100dvh - 8rem)",
+            overflowY: "auto",
           }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
               <p style={{ fontSize: "0.65rem", color: ACCENT, letterSpacing: "0.15em", textTransform: "uppercase" }}>
