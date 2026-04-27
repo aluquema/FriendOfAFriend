@@ -18,8 +18,8 @@ export async function GET(request: NextRequest) {
 
   if (!query) return NextResponse.json({ error: "no query" }, { status: 400 });
 
-  const clientId = 58117c861721470890e7a62d39006d1e;
-  const clientSecret = a8cf5429b89c47b0a5c3aaee30cc23ff;
+  const clientId = "58117c861721470890e7a62d39006d1e";
+  const clientSecret = "a8cf5429b89c47b0a5c3aaee30cc23ff";
 
   const tokenRes = await fetch("https://accounts.spotify.com/api/token", {
     method: "POST",
@@ -34,16 +34,4 @@ export async function GET(request: NextRequest) {
   const token = tokenData.access_token;
 
   const searchRes = await fetch(
-    `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=5`,
-    { headers: { Authorization: "Bearer " + token } }
-  );
-
-  const searchData = await searchRes.json();
-  return NextResponse.json(searchData);
-}
-
-export async function POST(request: NextRequest) {
-  const { songName, artist } = await request.json();
-  const youtubeId = await getYouTubeId(`${songName} ${artist} official audio`);
-  return NextResponse.json({ youtubeId });
-}
+    `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&ty
