@@ -66,10 +66,10 @@ export default function Onboarding() {
       const locationPromise = new Promise<{ lat: number; lng: number }>((resolve) => {
         navigator.geolocation.getCurrentPosition(
           (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-          () => resolve({
-            lat: 40.7128 + (Math.random() - 0.5) * 0.05,
-            lng: -74.006 + (Math.random() - 0.5) * 0.05,
-          }),
+          (pos) => resolve({ 
+  lat: pos.coords.latitude + (Math.random() - 0.5) * 0.008,
+  lng: pos.coords.longitude + (Math.random() - 0.5) * 0.008,
+}),
           { timeout: 5000 }
         );
       });
