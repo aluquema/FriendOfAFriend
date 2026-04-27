@@ -8,6 +8,8 @@ const supabase = createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRtemNheHJxdHRibGZyeXRlbmFlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4OTU5NTgsImV4cCI6MjA5MjQ3MTk1OH0.3lYKH-FZc8n-FUdnffUvKP294c72mAEzOV93iqb2rxM"
 );
 
+const randomOffset = () => (Math.random() - 0.5) * 0.008;
+
 export default function Onboarding() {
   const router = useRouter();
   const [step, setStep] = useState(1);
@@ -65,11 +67,14 @@ export default function Onboarding() {
 
       const locationPromise = new Promise<{ lat: number; lng: number }>((resolve) => {
         navigator.geolocation.getCurrentPosition(
-          (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-          (pos) => resolve({ 
-  lat: pos.coords.latitude + (Math.random() - 0.5) * 0.008,
-  lng: pos.coords.longitude + (Math.random() - 0.5) * 0.008,
-}),
+          (pos) => resolve({
+            lat: pos.coords.latitude + randomOffset(),
+            lng: pos.coords.longitude + randomOffset(),
+          }),
+          () => resolve({
+            lat: 40.7128 + randomOffset(),
+            lng: -74.006 + randomOffset(),
+          }),
           { timeout: 5000 }
         );
       });
