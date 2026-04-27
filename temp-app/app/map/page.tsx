@@ -13,7 +13,7 @@ const ACCENT = "#c0392b";
 const ACCENT_DIM = "rgba(192,57,43,0.2)";
 const ACCENT_GLOW = "rgba(192,57,43,0.4)";
 const ACCENT_FAINT = "rgba(192,57,43,0.08)";
-const snapToIntersection = (coord: number, precision: number = 0.002) => {
+const snapToIntersection = (coord: number, precision: number = 0.005) => {
   return Math.round(coord / precision) * precision;
 };
 

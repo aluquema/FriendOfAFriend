@@ -8,7 +8,9 @@ const supabase = createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRtemNheHJxdHRibGZyeXRlbmFlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4OTU5NTgsImV4cCI6MjA5MjQ3MTk1OH0.3lYKH-FZc8n-FUdnffUvKP294c72mAEzOV93iqb2rxM"
 );
 
-const randomOffset = () => (Math.random() - 0.5) * 0.0002;
+const snapToIntersection = (coord: number, precision: number = 0.005) => {
+  return Math.round(coord / precision) * precision;
+};
 
 export default function Onboarding() {
   const router = useRouter();
@@ -54,8 +56,8 @@ export default function Onboarding() {
           song_name: entrySong.title,
           artist: entrySong.artist,
           profile_id: profile.id,
-          latitude: lat + randomOffset(),
-          longitude: lng + randomOffset(),
+          latitude: snapToIntersection(lat),
+          longitude: snapToIntersection(lng),
           cover_art: entrySong.coverArt,
           preview_url: entrySong.previewUrl,
           spotify_id: entrySong.spotifyId,
