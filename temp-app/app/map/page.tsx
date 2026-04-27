@@ -280,7 +280,7 @@ export default function Map() {
 
         <div style={{
           position: "absolute",
-          bottom: "1.5rem",
+          bottom: "5rem",
           right: "1.5rem",
           zIndex: 10,
           display: "flex",
@@ -327,7 +327,7 @@ export default function Map() {
         {showDrop && (
           <div style={{
             position: "absolute",
-            bottom: "5rem",
+            bottom: "9rem",
             right: "1.5rem",
             zIndex: 20,
             width: "320px",
