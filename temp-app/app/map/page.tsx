@@ -18,15 +18,21 @@ const MAPBOX_TOKEN = "pk.eyJ1IjoiYWx1cXVlbWEiLCJhIjoiY21vYnVhdDdyMDVudTJyb3BwbHU
 const snapToStreet = async (lat: number, lng: number): Promise<{ lat: number; lng: number }> => {
   try {
     const res = await fetch(
-      `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?types=address&access_token=${MAPBOX_TOKEN}`
+      `https://api.mapbox.com/matching/v5/mapbox/walking/${lng},${lat}?access_token=${MAPBOX_TOKEN}&geometries=geojson`
     );
     const data = await res.json();
-    const feature = data.features?.[0];
-    if (feature) {
-      return { lng: feature.center[0], lat: feature.center[1] };
+    const coords = data.matchings?.[0]?.geometry?.coordinates?.[0];
+    if (coords) {
+      return {
+        lng: coords[0] + (Math.random() - 0.5) * 0.0003,
+        lat: coords[1] + (Math.random() - 0.5) * 0.0003,
+      };
     }
   } catch {}
-  return { lat, lng };
+  return {
+    lat: lat + (Math.random() - 0.5) * 0.0003,
+    lng: lng + (Math.random() - 0.5) * 0.0003,
+  };
 };
 
 export default function Map() {
