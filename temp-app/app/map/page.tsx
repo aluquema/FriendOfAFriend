@@ -13,7 +13,7 @@ const ACCENT = "#c0392b";
 const ACCENT_DIM = "rgba(192,57,43,0.2)";
 const ACCENT_GLOW = "rgba(192,57,43,0.4)";
 const ACCENT_FAINT = "rgba(192,57,43,0.08)";
-const randomOffset = () => (Math.random() - 0.5) * 0.0002;
+const randomOffset = () => (Math.random() - 0.5) * 0.001;
 
 export default function Map() {
   const router = useRouter();
@@ -23,6 +23,7 @@ export default function Map() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<any[]>([]);
   const [selected, setSelected] = useState<any>(null);
+  const [note, setNote] = useState("");
   const [searching, setSearching] = useState(false);
   const [dropping, setDropping] = useState(false);
 
@@ -66,7 +67,8 @@ export default function Map() {
               '<div style="padding:10px;">' +
               '<a href="/collection/' + song.profiles?.id + '" style="font-size:9px;color:rgba(192,57,43,0.5);margin:0 0 4px;text-transform:uppercase;letter-spacing:0.1em;text-decoration:none;display:block;">' + (song.profiles?.screenname || "Anonymous") + ' -&gt;</a>' +
               '<p style="font-size:12px;margin:4px 0 2px;color:#c0392b;">' + song.song_name + '</p>' +
-              '<p style="font-size:10px;color:rgba(192,57,43,0.5);margin:0 0 10px">' + song.artist + '</p>' +
+              '<p style="font-size:10px;color:rgba(192,57,43,0.5);margin:0 0 6px">' + song.artist + '</p>' +
+              (song.note ? '<p style="font-size:10px;color:rgba(192,57,43,0.7);font-style:italic;margin:0 0 10px;border-top:1px solid rgba(192,57,43,0.15);padding-top:6px;">&ldquo;' + song.note + '&rdquo;</p>' : '<div style="margin-bottom:10px;"></div>') +
               '<button onclick="window.collectSong(' + song.id + ')" style="width:100%;background:#c0392b;color:#080808;border:none;padding:7px 0;font-size:10px;cursor:pointer;letter-spacing:0.1em;font-family:monospace;text-transform:uppercase;border-radius:999px;">Collect</button>' +
               '</div>' +
               '</div>'
@@ -125,6 +127,7 @@ export default function Map() {
         longitude: lng,
         cover_art: selected.album.images[1]?.url,
         spotify_id: selected.id,
+        note: note.trim() || null,
       }]).select().single();
 
       if (song && map.current) {
@@ -134,7 +137,8 @@ export default function Map() {
           '<div style="padding:10px;">' +
           '<a href="/collection/' + profiles[0].id + '" style="font-size:9px;color:rgba(192,57,43,0.5);text-transform:uppercase;letter-spacing:0.1em;text-decoration:none;display:block;margin-bottom:4px;">' + profiles[0].screenname + ' -&gt;</a>' +
           '<p style="font-size:12px;margin:4px 0 2px;color:#c0392b;">' + song.song_name + '</p>' +
-          '<p style="font-size:10px;color:rgba(192,57,43,0.5);margin:0 0 10px">' + song.artist + '</p>' +
+          '<p style="font-size:10px;color:rgba(192,57,43,0.5);margin:0 0 6px">' + song.artist + '</p>' +
+          (note.trim() ? '<p style="font-size:10px;color:rgba(192,57,43,0.7);font-style:italic;margin:0 0 10px;border-top:1px solid rgba(192,57,43,0.15);padding-top:6px;">&ldquo;' + note.trim() + '&rdquo;</p>' : '<div style="margin-bottom:10px;"></div>') +
           '</div>' +
           '</div>'
         );
@@ -152,6 +156,7 @@ export default function Map() {
       setSelected(null);
       setQuery("");
       setResults([]);
+      setNote("");
       setDropping(false);
     }, () => setDropping(false));
   };
@@ -211,6 +216,24 @@ export default function Map() {
         }
         .map-result-row:last-child { border-bottom: none; }
         .map-result-row:hover { background: rgba(192,57,43,0.06); }
+        .note-input {
+          width: 100%;
+          background: transparent;
+          border: 1px solid rgba(192,57,43,0.2);
+          border-radius: 12px;
+          color: #c0392b;
+          font-size: 0.68rem;
+          font-family: var(--font-dm-mono), monospace;
+          letter-spacing: 0.04em;
+          outline: none;
+          caret-color: #c0392b;
+          padding: 0.6rem 0.75rem;
+          resize: none;
+          transition: border-color 0.2s;
+          box-sizing: border-box;
+        }
+        .note-input::placeholder { color: rgba(192,57,43,0.25); }
+        .note-input:focus { border-color: #c0392b; }
         .grain {
           position: fixed;
           inset: 0;
@@ -321,7 +344,7 @@ export default function Map() {
                 Drop a Song Here
               </p>
               <button
-                onClick={() => { setShowDrop(false); setSelected(null); setResults([]); setQuery(""); }}
+                onClick={() => { setShowDrop(false); setSelected(null); setResults([]); setQuery(""); setNote(""); }}
                 style={{ background: "none", border: "none", color: "rgba(192,57,43,0.35)", cursor: "pointer", fontSize: "0.75rem" }}
               >
                 ✕
@@ -384,6 +407,16 @@ export default function Map() {
                   </div>
                   <button onClick={() => setSelected(null)} style={{ background: "none", border: "none", color: "rgba(192,57,43,0.3)", cursor: "pointer", fontSize: "0.65rem" }}>✕</button>
                 </div>
+
+                <textarea
+                  className="note-input"
+                  placeholder="Add a note... (optional)"
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  rows={2}
+                  maxLength={120}
+                />
+
                 <button
                   onClick={dropSong}
                   disabled={dropping}
