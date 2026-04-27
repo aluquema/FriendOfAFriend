@@ -8,21 +8,7 @@ const supabase = createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRtemNheHJxdHRibGZyeXRlbmFlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4OTU5NTgsImV4cCI6MjA5MjQ3MTk1OH0.3lYKH-FZc8n-FUdnffUvKP294c72mAEzOV93iqb2rxM"
 );
 
-const MAPBOX_TOKEN = "pk.eyJ1IjoiYWx1cXVlbWEiLCJhIjoiY21vYnVhdDdyMDVudTJyb3BwbHU2bnJkdCJ9.fkJLuwvSZ12xkYpgyld0dA";
-
-const snapToStreet = async (lat: number, lng: number): Promise<{ lat: number; lng: number }> => {
-  try {
-    const res = await fetch(
-      `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?types=address&access_token=${MAPBOX_TOKEN}`
-    );
-    const data = await res.json();
-    const feature = data.features?.[0];
-    if (feature) {
-      return { lng: feature.center[0], lat: feature.center[1] };
-    }
-  } catch {}
-  return { lat, lng };
-};
+const randomOffset = () => (Math.random() - 0.5) * 0.0004;
 
 export default function Onboarding() {
   const router = useRouter();
@@ -64,13 +50,12 @@ export default function Onboarding() {
 
     if (entrySong && profile) {
       const saveSong = async (lat: number, lng: number) => {
-        const snapped = await snapToStreet(lat, lng);
         const { error: songError } = await supabase.from("songs").insert([{
           song_name: entrySong.title,
           artist: entrySong.artist,
           profile_id: profile.id,
-          latitude: snapped.lat,
-          longitude: snapped.lng,
+          latitude: lat + randomOffset(),
+          longitude: lng + randomOffset(),
           cover_art: entrySong.coverArt,
           preview_url: entrySong.previewUrl,
           spotify_id: entrySong.spotifyId,

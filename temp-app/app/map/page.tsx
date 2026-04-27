@@ -13,27 +13,7 @@ const ACCENT = "#c0392b";
 const ACCENT_DIM = "rgba(192,57,43,0.2)";
 const ACCENT_GLOW = "rgba(192,57,43,0.4)";
 const ACCENT_FAINT = "rgba(192,57,43,0.08)";
-const MAPBOX_TOKEN = "pk.eyJ1IjoiYWx1cXVlbWEiLCJhIjoiY21vYnVhdDdyMDVudTJyb3BwbHU2bnJkdCJ9.fkJLuwvSZ12xkYpgyld0dA";
-
-const snapToStreet = async (lat: number, lng: number): Promise<{ lat: number; lng: number }> => {
-  try {
-    const res = await fetch(
-      `https://api.mapbox.com/matching/v5/mapbox/walking/${lng},${lat}?access_token=${MAPBOX_TOKEN}&geometries=geojson`
-    );
-    const data = await res.json();
-    const coords = data.matchings?.[0]?.geometry?.coordinates?.[0];
-    if (coords) {
-      return {
-        lng: coords[0] + (Math.random() - 0.5) * 0.0003,
-        lat: coords[1] + (Math.random() - 0.5) * 0.0003,
-      };
-    }
-  } catch {}
-  return {
-    lat: lat + (Math.random() - 0.5) * 0.0003,
-    lng: lng + (Math.random() - 0.5) * 0.0003,
-  };
-};
+const randomOffset = () => (Math.random() - 0.5) * 0.0004;
 
 export default function Map() {
   const router = useRouter();
@@ -134,9 +114,8 @@ export default function Map() {
     if (!profiles || !profiles[0]) { setDropping(false); return; }
 
     navigator.geolocation.getCurrentPosition(async (pos) => {
-      const snapped = await snapToStreet(pos.coords.latitude, pos.coords.longitude);
-      const lat = snapped.lat;
-      const lng = snapped.lng;
+      const lat = pos.coords.latitude + randomOffset();
+      const lng = pos.coords.longitude + randomOffset();
 
       const { data: song } = await supabase.from("songs").insert([{
         song_name: selected.name,
