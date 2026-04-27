@@ -13,7 +13,7 @@ const ACCENT = "#c0392b";
 const ACCENT_DIM = "rgba(192,57,43,0.2)";
 const ACCENT_GLOW = "rgba(192,57,43,0.4)";
 const ACCENT_FAINT = "rgba(192,57,43,0.08)";
-const randomOffset = () => (Math.random() - 0.5) * 0.008;
+const randomOffset = () => (Math.random() - 0.5) * 0.003;
 
 export default function Map() {
   const router = useRouter();
@@ -40,7 +40,7 @@ export default function Map() {
           profile_id: profiles[0].id,
           song_id: songId,
         }]);
-        alert("Song Collected!");
+        alert("Song collected!");
       }
     };
   }, []);
@@ -114,15 +114,12 @@ export default function Map() {
     if (!profiles || !profiles[0]) { setDropping(false); return; }
 
     navigator.geolocation.getCurrentPosition(async (pos) => {
-      const lat = pos.coords.latitude + randomOffset();
-      const lng = pos.coords.longitude + randomOffset();
-
       const { data: song } = await supabase.from("songs").insert([{
         song_name: selected.name,
         artist: selected.artists[0].name,
         profile_id: profiles[0].id,
-        latitude: lat,
-        longitude: lng,
+        latitude: pos.coords.latitude,
+        longitude: pos.coords.longitude,
         cover_art: selected.album.images[1]?.url,
         spotify_id: selected.id,
       }]).select().single();
@@ -145,7 +142,7 @@ export default function Map() {
         el.style.backgroundColor = ACCENT;
         el.style.boxShadow = "0 0 8px " + ACCENT_GLOW + ", 0 0 16px " + ACCENT_GLOW;
         el.style.cursor = "pointer";
-        new mapboxgl.Marker(el).setLngLat([lng, lat]).setPopup(popup).addTo(map.current);
+        new mapboxgl.Marker(el).setLngLat([pos.coords.longitude, pos.coords.latitude]).setPopup(popup).addTo(map.current);
       }
 
       setShowDrop(false);
