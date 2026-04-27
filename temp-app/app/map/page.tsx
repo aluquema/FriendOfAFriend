@@ -13,7 +13,9 @@ const ACCENT = "#c0392b";
 const ACCENT_DIM = "rgba(192,57,43,0.2)";
 const ACCENT_GLOW = "rgba(192,57,43,0.4)";
 const ACCENT_FAINT = "rgba(192,57,43,0.08)";
-const randomOffset = () => (Math.random() - 0.5) * 0.001;
+const snapToIntersection = (coord: number, precision: number = 0.002) => {
+  return Math.round(coord / precision) * precision;
+};
 
 export default function Map() {
   const router = useRouter();
@@ -116,8 +118,8 @@ export default function Map() {
     if (!profiles || !profiles[0]) { setDropping(false); return; }
 
     navigator.geolocation.getCurrentPosition(async (pos) => {
-      const lat = pos.coords.latitude + randomOffset();
-      const lng = pos.coords.longitude + randomOffset();
+      const lat = snapToIntersection(pos.coords.latitude);
+      const lng = snapToIntersection(pos.coords.longitude);
 
       const { data: song } = await supabase.from("songs").insert([{
         song_name: selected.name,
@@ -161,7 +163,7 @@ export default function Map() {
     }, () => setDropping(false));
   };
 
- return (
+  return (
     <>
       <style>{`
         .map-pill-wrapper {
