@@ -9,18 +9,51 @@ const supabase = createClient("https://tmzcaxrqttblfrytenae.supabase.co","eyJhbG
 
 mapboxgl.accessToken = "pk.eyJ1IjoiYWx1cXVlbWEiLCJhIjoiY21vYnVhdDdyMDVudTJyb3BwbHU2bnJkdCJ9.fkJLuwvSZ12xkYpgyld0dA";
 
-const ACCENT = "#c0392b";
-const ACCENT_DIM = "rgba(192,57,43,0.2)";
-const ACCENT_GLOW = "rgba(192,57,43,0.4)";
-const ACCENT_FAINT = "rgba(192,57,43,0.08)";
-const snapToIntersection = (coord: number, precision: number = 0.005) => {
-  return Math.round(coord / precision) * precision;
+const MAPBOX_TOKEN = "pk.eyJ1IjoiYWx1cXVlbWEiLCJhIjoiY21vYnVhdDdyMDVudTJyb3BwbHU2bnJkdCJ9.fkJLuwvSZ12xkYpgyld0dA";
+const ACCENT = "#a62621";
+const ACCENT_DIM = "rgba(166,38,33,0.2)";
+const ACCENT_GLOW = "rgba(166,38,33,0.4)";
+const ACCENT_FAINT = "rgba(166,38,33,0.08)";
+
+const snapToStreet = async (lat: number, lng: number): Promise<{ lat: number; lng: number }> => {
+  try {
+    const reverseRes = await fetch(
+      `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?types=address&access_token=${MAPBOX_TOKEN}`
+    );
+    const reverseData = await reverseRes.json();
+    const feature = reverseData.features?.[0];
+    if (!feature) throw new Error("No feature");
+
+    const streetName = feature.place_name.split(",")[0].replace(/^\d+\s+/, "");
+    const context = feature.context?.find((c: any) => c.id.startsWith("place"))?.text || "";
+    const fullStreet = `${streetName}, ${context}`;
+
+    const forwardRes = await fetch(
+      `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(fullStreet)}.json?proximity=${lng},${lat}&types=address&access_token=${MAPBOX_TOKEN}`
+    );
+    const forwardData = await forwardRes.json();
+    const streetPoint = forwardData.features?.[0]?.center;
+    if (!streetPoint) throw new Error("No street point");
+
+    const alongOffset = (Math.random() - 0.5) * 0.0006;
+
+    return {
+      lng: streetPoint[0] + alongOffset,
+      lat: streetPoint[1],
+    };
+  } catch {
+    return {
+      lat: Math.round(lat / 0.005) * 0.005,
+      lng: Math.round(lng / 0.005) * 0.005,
+    };
+  }
 };
 
 export default function Map() {
   const router = useRouter();
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
+  const userLocation = useRef<{ lat: number; lng: number } | null>(null);
   const [showDrop, setShowDrop] = useState(false);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<any[]>([]);
@@ -28,6 +61,7 @@ export default function Map() {
   const [note, setNote] = useState("");
   const [searching, setSearching] = useState(false);
   const [dropping, setDropping] = useState(false);
+  const [locationError, setLocationError] = useState(false);
 
   useEffect(() => {
     (window as any).collectSong = async (songId: number) => {
@@ -51,47 +85,84 @@ export default function Map() {
   useEffect(() => {
     if (map.current) return;
 
-    const initMap = (lng: number, lat: number, zoom: number) => {
-      map.current = new mapboxgl.Map({
-        container: mapContainer.current!,
-        style: "mapbox://styles/aluquema/cmogb5mmw000o01pfhtrxajwd",
-        center: [lng, lat],
-         zoom: zoom,
-  maxZoom: 15,
-      });
-
-      map.current.on("load", async () => {
-        const { data: songs } = await supabase.from("songs").select("*, profiles(id, screenname)");
-        if (songs) {
-          songs.forEach((song) => {
-            const popup = new mapboxgl.Popup({ offset: 25, maxWidth: "200px" }).setHTML(
-              '<div style="background:#0a0404;color:#c0392b;font-family:monospace;width:180px;border:1px solid rgba(192,57,43,0.3);">' +
-              (song.cover_art ? '<img src="' + song.cover_art + '" style="width:100%;height:180px;object-fit:cover;display:block;opacity:0.9;" />' : '') +
-              '<div style="padding:10px;">' +
-              '<a href="/collection/' + song.profiles?.id + '" style="font-size:9px;color:rgba(192,57,43,0.5);margin:0 0 4px;text-transform:uppercase;letter-spacing:0.1em;text-decoration:none;display:block;">' + (song.profiles?.screenname || "Anonymous") + ' -&gt;</a>' +
-              '<p style="font-size:12px;margin:4px 0 2px;color:#c0392b;">' + song.song_name + '</p>' +
-              '<p style="font-size:10px;color:rgba(192,57,43,0.5);margin:0 0 6px">' + song.artist + '</p>' +
-              (song.note ? '<p style="font-size:10px;color:rgba(192,57,43,0.7);font-style:italic;margin:0 0 10px;border-top:1px solid rgba(192,57,43,0.15);padding-top:6px;">&ldquo;' + song.note + '&rdquo;</p>' : '<div style="margin-bottom:10px;"></div>') +
-              '<button onclick="window.collectSong(' + song.id + ')" style="width:100%;background:#c0392b;color:#080808;border:none;padding:7px 0;font-size:10px;cursor:pointer;letter-spacing:0.1em;font-family:monospace;text-transform:uppercase;border-radius:999px;">Collect</button>' +
-              '</div>' +
-              '</div>'
-            );
-            const el = document.createElement("div");
-            el.style.width = "8px";
-            el.style.height = "8px";
-            el.style.borderRadius = "50%";
-            el.style.backgroundColor = ACCENT;
-            el.style.boxShadow = "0 0 8px " + ACCENT_GLOW + ", 0 0 16px " + ACCENT_GLOW;
-            el.style.cursor = "pointer";
-            new mapboxgl.Marker(el).setLngLat([song.longitude, song.latitude]).setPopup(popup).addTo(map.current!);
-          });
-        }
-      });
-    };
-
     navigator.geolocation.getCurrentPosition(
-      (pos) => initMap(pos.coords.longitude, pos.coords.latitude, 14),
-      () => initMap(-74.006, 40.7128, 11)
+      (pos) => {
+        userLocation.current = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+
+        map.current = new mapboxgl.Map({
+          container: mapContainer.current!,
+          style: "mapbox://styles/aluquema/cmogb5mmw000o01pfhtrxajwd",
+          center: [pos.coords.longitude, pos.coords.latitude],
+          zoom: 14,
+          maxZoom: 15,
+        });
+
+        map.current.on("load", async () => {
+          const { data: songs } = await supabase.from("songs").select("*, profiles(id, screenname)");
+          if (songs) {
+            songs.forEach((song) => {
+              const popup = new mapboxgl.Popup({ offset: 25, maxWidth: "200px" }).setHTML(
+                '<div style="background:#0a0404;color:#a62621;font-family:monospace;width:180px;border:1px solid rgba(166,38,33,0.3);">' +
+                (song.cover_art ? '<img src="' + song.cover_art + '" style="width:100%;height:180px;object-fit:cover;display:block;opacity:0.9;" />' : '') +
+                '<div style="padding:10px;">' +
+                '<a href="/collection/' + song.profiles?.id + '" style="font-size:9px;color:rgba(166,38,33,0.5);margin:0 0 4px;text-transform:uppercase;letter-spacing:0.1em;text-decoration:none;display:block;">' + (song.profiles?.screenname || "Anonymous") + ' -&gt;</a>' +
+                '<p style="font-size:12px;margin:4px 0 2px;color:#a62621;">' + song.song_name + '</p>' +
+                '<p style="font-size:10px;color:rgba(166,38,33,0.5);margin:0 0 6px">' + song.artist + '</p>' +
+                (song.note ? '<p style="font-size:10px;color:rgba(166,38,33,0.7);font-style:italic;margin:0 0 10px;border-top:1px solid rgba(166,38,33,0.15);padding-top:6px;">&ldquo;' + song.note + '&rdquo;</p>' : '<div style="margin-bottom:10px;"></div>') +
+                '<button onclick="window.collectSong(' + song.id + ')" style="width:100%;background:#a62621;color:#080808;border:none;padding:7px 0;font-size:10px;cursor:pointer;letter-spacing:0.1em;font-family:monospace;text-transform:uppercase;border-radius:999px;">Collect</button>' +
+                '</div>' +
+                '</div>'
+              );
+              const el = document.createElement("div");
+              el.style.width = "8px";
+              el.style.height = "8px";
+              el.style.borderRadius = "50%";
+              el.style.backgroundColor = ACCENT;
+              el.style.boxShadow = "0 0 8px " + ACCENT_GLOW + ", 0 0 16px " + ACCENT_GLOW;
+              el.style.cursor = "pointer";
+              new mapboxgl.Marker(el).setLngLat([song.longitude, song.latitude]).setPopup(popup).addTo(map.current!);
+            });
+          }
+        });
+      },
+      () => {
+        setLocationError(true);
+        map.current = new mapboxgl.Map({
+          container: mapContainer.current!,
+          style: "mapbox://styles/aluquema/cmogb5mmw000o01pfhtrxajwd",
+          center: [-74.006, 40.7128],
+          zoom: 11,
+          maxZoom: 15,
+        });
+
+        map.current.on("load", async () => {
+          const { data: songs } = await supabase.from("songs").select("*, profiles(id, screenname)");
+          if (songs) {
+            songs.forEach((song) => {
+              const popup = new mapboxgl.Popup({ offset: 25, maxWidth: "200px" }).setHTML(
+                '<div style="background:#0a0404;color:#a62621;font-family:monospace;width:180px;border:1px solid rgba(166,38,33,0.3);">' +
+                (song.cover_art ? '<img src="' + song.cover_art + '" style="width:100%;height:180px;object-fit:cover;display:block;opacity:0.9;" />' : '') +
+                '<div style="padding:10px;">' +
+                '<a href="/collection/' + song.profiles?.id + '" style="font-size:9px;color:rgba(166,38,33,0.5);margin:0 0 4px;text-transform:uppercase;letter-spacing:0.1em;text-decoration:none;display:block;">' + (song.profiles?.screenname || "Anonymous") + ' -&gt;</a>' +
+                '<p style="font-size:12px;margin:4px 0 2px;color:#a62621;">' + song.song_name + '</p>' +
+                '<p style="font-size:10px;color:rgba(166,38,33,0.5);margin:0 0 6px">' + song.artist + '</p>' +
+                (song.note ? '<p style="font-size:10px;color:rgba(166,38,33,0.7);font-style:italic;margin:0 0 10px;border-top:1px solid rgba(166,38,33,0.15);padding-top:6px;">&ldquo;' + song.note + '&rdquo;</p>' : '<div style="margin-bottom:10px;"></div>') +
+                '<button onclick="window.collectSong(' + song.id + ')" style="width:100%;background:#a62621;color:#080808;border:none;padding:7px 0;font-size:10px;cursor:pointer;letter-spacing:0.1em;font-family:monospace;text-transform:uppercase;border-radius:999px;">Collect</button>' +
+                '</div>' +
+                '</div>'
+              );
+              const el = document.createElement("div");
+              el.style.width = "8px";
+              el.style.height = "8px";
+              el.style.borderRadius = "50%";
+              el.style.backgroundColor = ACCENT;
+              el.style.boxShadow = "0 0 8px " + ACCENT_GLOW + ", 0 0 16px " + ACCENT_GLOW;
+              el.style.cursor = "pointer";
+              new mapboxgl.Marker(el).setLngLat([song.longitude, song.latitude]).setPopup(popup).addTo(map.current!);
+            });
+          }
+        });
+      }
     );
   }, []);
 
@@ -106,6 +177,12 @@ export default function Map() {
 
   const dropSong = async () => {
     if (!selected) return;
+
+    if (!userLocation.current) {
+      alert("We need your location to drop a song. Please enable location access and try again.");
+      return;
+    }
+
     setDropping(true);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setDropping(false); return; }
@@ -118,16 +195,19 @@ export default function Map() {
 
     if (!profiles || !profiles[0]) { setDropping(false); return; }
 
+    // Get fresh GPS location
     navigator.geolocation.getCurrentPosition(async (pos) => {
-      const lat = snapToIntersection(pos.coords.latitude);
-      const lng = snapToIntersection(pos.coords.longitude);
+      userLocation.current = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+
+      // Snap to street
+      const snapped = await snapToStreet(pos.coords.latitude, pos.coords.longitude);
 
       const { data: song } = await supabase.from("songs").insert([{
         song_name: selected.name,
         artist: selected.artists[0].name,
         profile_id: profiles[0].id,
-        latitude: lat,
-        longitude: lng,
+        latitude: snapped.lat,
+        longitude: snapped.lng,
         cover_art: selected.album.images[1]?.url,
         spotify_id: selected.id,
         note: note.trim() || null,
@@ -135,13 +215,13 @@ export default function Map() {
 
       if (song && map.current) {
         const popup = new mapboxgl.Popup({ offset: 25, maxWidth: "200px" }).setHTML(
-          '<div style="background:#0a0404;color:#c0392b;font-family:monospace;width:180px;border:1px solid rgba(192,57,43,0.3);">' +
+          '<div style="background:#0a0404;color:#a62621;font-family:monospace;width:180px;border:1px solid rgba(166,38,33,0.3);">' +
           (song.cover_art ? '<img src="' + song.cover_art + '" style="width:100%;height:180px;object-fit:cover;display:block;opacity:0.9;" />' : '') +
           '<div style="padding:10px;">' +
-          '<a href="/collection/' + profiles[0].id + '" style="font-size:9px;color:rgba(192,57,43,0.5);text-transform:uppercase;letter-spacing:0.1em;text-decoration:none;display:block;margin-bottom:4px;">' + profiles[0].screenname + ' -&gt;</a>' +
-          '<p style="font-size:12px;margin:4px 0 2px;color:#c0392b;">' + song.song_name + '</p>' +
-          '<p style="font-size:10px;color:rgba(192,57,43,0.5);margin:0 0 6px">' + song.artist + '</p>' +
-          (note.trim() ? '<p style="font-size:10px;color:rgba(192,57,43,0.7);font-style:italic;margin:0 0 10px;border-top:1px solid rgba(192,57,43,0.15);padding-top:6px;">&ldquo;' + note.trim() + '&rdquo;</p>' : '<div style="margin-bottom:10px;"></div>') +
+          '<a href="/collection/' + profiles[0].id + '" style="font-size:9px;color:rgba(166,38,33,0.5);text-transform:uppercase;letter-spacing:0.1em;text-decoration:none;display:block;margin-bottom:4px;">' + profiles[0].screenname + ' -&gt;</a>' +
+          '<p style="font-size:12px;margin:4px 0 2px;color:#a62621;">' + song.song_name + '</p>' +
+          '<p style="font-size:10px;color:rgba(166,38,33,0.5);margin:0 0 6px">' + song.artist + '</p>' +
+          (note.trim() ? '<p style="font-size:10px;color:rgba(166,38,33,0.7);font-style:italic;margin:0 0 10px;border-top:1px solid rgba(166,38,33,0.15);padding-top:6px;">&ldquo;' + note.trim() + '&rdquo;</p>' : '<div style="margin-bottom:10px;"></div>') +
           '</div>' +
           '</div>'
         );
@@ -152,7 +232,7 @@ export default function Map() {
         el.style.backgroundColor = ACCENT;
         el.style.boxShadow = "0 0 8px " + ACCENT_GLOW + ", 0 0 16px " + ACCENT_GLOW;
         el.style.cursor = "pointer";
-        new mapboxgl.Marker(el).setLngLat([lng, lat]).setPopup(popup).addTo(map.current);
+        new mapboxgl.Marker(el).setLngLat([snapped.lng, snapped.lat]).setPopup(popup).addTo(map.current);
       }
 
       setShowDrop(false);
@@ -161,7 +241,10 @@ export default function Map() {
       setResults([]);
       setNote("");
       setDropping(false);
-    }, () => setDropping(false));
+    }, () => {
+      alert("Could not get your location. Please enable location access and try again.");
+      setDropping(false);
+    }, { timeout: 10000, enableHighAccuracy: true });
   };
 
   return (
@@ -170,7 +253,7 @@ export default function Map() {
         .map-pill-wrapper {
           display: flex;
           align-items: center;
-          border: 1px solid rgba(192,57,43,0.3);
+          border: 1px solid rgba(166,38,33,0.3);
           border-radius: 999px;
           padding: 0.4rem 0.4rem 0.4rem 1rem;
           min-height: 2.8rem;
@@ -178,24 +261,24 @@ export default function Map() {
           transition: border-color 0.2s, box-shadow 0.2s;
         }
         .map-pill-wrapper:focus-within {
-          border-color: #c0392b;
-          box-shadow: 0 0 12px rgba(192,57,43,0.4);
+          border-color: #a62621;
+          box-shadow: 0 0 12px rgba(166,38,33,0.4);
         }
         .map-pill-input {
           flex: 1;
           background: transparent;
           border: none;
-          color: #c0392b;
+          color: #a62621;
           font-size: 0.72rem;
           font-family: var(--font-dm-mono), monospace;
           letter-spacing: 0.05em;
           outline: none;
-          caret-color: #c0392b;
+          caret-color: #a62621;
           min-width: 0;
         }
-        .map-pill-input::placeholder { color: rgba(192,57,43,0.3); }
+        .map-pill-input::placeholder { color: rgba(166,38,33,0.3); }
         .map-pill-search-btn {
-          background: #c0392b;
+          background: #a62621;
           border: none;
           border-radius: 999px;
           color: #080808;
@@ -214,29 +297,29 @@ export default function Map() {
           gap: 0.6rem;
           padding: 0.5rem 0.75rem;
           cursor: pointer;
-          border-bottom: 1px solid rgba(192,57,43,0.08);
+          border-bottom: 1px solid rgba(166,38,33,0.08);
           transition: background 0.15s;
         }
         .map-result-row:last-child { border-bottom: none; }
-        .map-result-row:hover { background: rgba(192,57,43,0.06); }
+        .map-result-row:hover { background: rgba(166,38,33,0.06); }
         .note-input {
           width: 100%;
           background: transparent;
-          border: 1px solid rgba(192,57,43,0.2);
+          border: 1px solid rgba(166,38,33,0.2);
           border-radius: 12px;
-          color: #c0392b;
+          color: #a62621;
           font-size: 0.68rem;
           font-family: var(--font-dm-mono), monospace;
           letter-spacing: 0.04em;
           outline: none;
-          caret-color: #c0392b;
+          caret-color: #a62621;
           padding: 0.6rem 0.75rem;
           resize: none;
           transition: border-color 0.2s;
           box-sizing: border-box;
         }
-        .note-input::placeholder { color: rgba(192,57,43,0.25); }
-        .note-input:focus { border-color: #c0392b; }
+        .note-input::placeholder { color: rgba(166,38,33,0.25); }
+        .note-input:focus { border-color: #a62621; }
         .grain {
           position: fixed;
           inset: 0;
@@ -252,35 +335,57 @@ export default function Map() {
 
       <main style={{ width: "100%", height: "100dvh", position: "relative", backgroundColor: "#060404" }}>
 
+        {/* Vignette overlay */}
+        <div style={{
+          position: "absolute",
+          inset: 0,
+          pointerEvents: "none",
+          zIndex: 5,
+          background: "radial-gradient(ellipse 65% 65% at 50% 50%, transparent 35%, rgba(6,4,4,0.7) 55%, rgba(6,4,4,1) 85%)",
+        }} />
+
+        {/* Logo top left */}
         <div style={{
           position: "absolute",
           top: "1.5rem",
           left: "1.5rem",
           zIndex: 10,
         }}>
-          <p style={{
-            fontFamily: "var(--font-playfair), serif",
-            fontStyle: "italic",
-            fontSize: "clamp(1rem, 3vw, 1.8rem)",
-            fontWeight: 400,
-            color: ACCENT,
-            textShadow: "0 0 20px rgba(192,57,43,0.4)",
-            lineHeight: 1,
-            marginBottom: "0.25rem",
-          }}>
-            Friend of a Friend
-          </p>
-          <p style={{
-            fontFamily: "var(--font-dm-mono), monospace",
-            fontSize: "0.6rem",
-            color: "rgba(192,57,43,0.35)",
-            letterSpacing: "0.15em",
-            textTransform: "uppercase",
-          }}>
-            The Neighborhood
-          </p>
+          <img
+            src="/FriendOfAFriend_Logo.png"
+            alt="Friend of a Friend"
+            style={{
+              width: "clamp(100px, 12vw, 160px)",
+              height: "auto",
+              display: "block",
+              mixBlendMode: "lighten" as const,
+            }}
+          />
         </div>
 
+        {/* Location error banner */}
+        {locationError && (
+          <div style={{
+            position: "absolute",
+            top: "1.5rem",
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 10,
+            background: "rgba(6,4,4,0.95)",
+            border: "1px solid " + ACCENT_DIM,
+            borderRadius: "999px",
+            padding: "0.5rem 1.25rem",
+            fontSize: "0.62rem",
+            color: "rgba(166,38,33,0.6)",
+            fontFamily: "var(--font-dm-mono), monospace",
+            letterSpacing: "0.08em",
+            whiteSpace: "nowrap",
+          }}>
+            Location unavailable — enable access to drop songs
+          </div>
+        )}
+
+        {/* Bottom right buttons */}
         <div style={{
           position: "absolute",
           bottom: "1.5rem",
@@ -293,7 +398,7 @@ export default function Map() {
           <button
             onClick={() => setShowDrop(true)}
             style={{
-              background: ACCENT,
+              background: locationError ? "rgba(166,38,33,0.3)" : ACCENT,
               color: "#080808",
               border: "none",
               borderRadius: "999px",
@@ -301,8 +406,8 @@ export default function Map() {
               fontSize: "0.65rem",
               letterSpacing: "0.12em",
               textTransform: "uppercase" as const,
-              cursor: "pointer",
-              boxShadow: "0 0 20px " + ACCENT_GLOW,
+              cursor: locationError ? "not-allowed" : "pointer",
+              boxShadow: locationError ? "none" : "0 0 20px " + ACCENT_GLOW,
               fontFamily: "var(--font-dm-mono), monospace",
             }}
           >
@@ -327,6 +432,7 @@ export default function Map() {
           </button>
         </div>
 
+        {/* Drop panel */}
         {showDrop && (
           <div style={{
             position: "absolute",
@@ -339,7 +445,7 @@ export default function Map() {
             borderRadius: "16px",
             padding: "1.25rem",
             backdropFilter: "blur(12px)",
-            boxShadow: "0 0 40px rgba(192,57,43,0.15)",
+            boxShadow: "0 0 40px rgba(166,38,33,0.15)",
             fontFamily: "var(--font-dm-mono), monospace",
             maxHeight: "calc(100dvh - 8rem)",
             overflowY: "auto",
@@ -350,7 +456,7 @@ export default function Map() {
               </p>
               <button
                 onClick={() => { setShowDrop(false); setSelected(null); setResults([]); setQuery(""); setNote(""); }}
-                style={{ background: "none", border: "none", color: "rgba(192,57,43,0.35)", cursor: "pointer", fontSize: "0.75rem" }}
+                style={{ background: "none", border: "none", color: "rgba(166,38,33,0.35)", cursor: "pointer", fontSize: "0.75rem" }}
               >
                 ✕
               </button>
@@ -374,7 +480,7 @@ export default function Map() {
 
                 {results.length > 0 && (
                   <div style={{
-                    border: "1px solid rgba(192,57,43,0.15)",
+                    border: "1px solid rgba(166,38,33,0.15)",
                     borderRadius: "12px",
                     overflow: "hidden",
                     background: "rgba(10,4,4,0.9)",
@@ -386,7 +492,7 @@ export default function Map() {
                         <img src={track.album.images[2]?.url} alt="" style={{ width: 32, height: 32, objectFit: "cover", borderRadius: 4, opacity: 0.85 }} />
                         <div>
                           <p style={{ fontSize: "0.7rem", color: ACCENT, marginBottom: "0.1rem" }}>{track.name}</p>
-                          <p style={{ fontSize: "0.6rem", color: "rgba(192,57,43,0.4)" }}>{track.artists[0].name}</p>
+                          <p style={{ fontSize: "0.6rem", color: "rgba(166,38,33,0.4)" }}>{track.artists[0].name}</p>
                         </div>
                       </div>
                     ))}
@@ -408,9 +514,9 @@ export default function Map() {
                   <img src={selected.album.images[2]?.url} alt="" style={{ width: 32, height: 32, objectFit: "cover", borderRadius: 4 }} />
                   <div style={{ flex: 1 }}>
                     <p style={{ fontSize: "0.7rem", color: ACCENT }}>{selected.name}</p>
-                    <p style={{ fontSize: "0.6rem", color: "rgba(192,57,43,0.4)" }}>{selected.artists[0].name}</p>
+                    <p style={{ fontSize: "0.6rem", color: "rgba(166,38,33,0.4)" }}>{selected.artists[0].name}</p>
                   </div>
-                  <button onClick={() => setSelected(null)} style={{ background: "none", border: "none", color: "rgba(192,57,43,0.3)", cursor: "pointer", fontSize: "0.65rem" }}>✕</button>
+                  <button onClick={() => setSelected(null)} style={{ background: "none", border: "none", color: "rgba(166,38,33,0.3)", cursor: "pointer", fontSize: "0.65rem" }}>✕</button>
                 </div>
 
                 <textarea
@@ -429,7 +535,7 @@ export default function Map() {
                     width: "100%",
                     background: dropping ? "transparent" : ACCENT,
                     border: "1px solid " + ACCENT,
-                    color: dropping ? "rgba(192,57,43,0.4)" : "#080808",
+                    color: dropping ? "rgba(166,38,33,0.4)" : "#080808",
                     borderRadius: "999px",
                     padding: "0.75rem",
                     fontSize: "0.65rem",
