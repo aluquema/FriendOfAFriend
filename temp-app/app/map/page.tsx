@@ -195,11 +195,8 @@ export default function Map() {
 
     if (!profiles || !profiles[0]) { setDropping(false); return; }
 
-    // Get fresh GPS location
     navigator.geolocation.getCurrentPosition(async (pos) => {
       userLocation.current = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-
-      // Snap to street
       const snapped = await snapToStreet(pos.coords.latitude, pos.coords.longitude);
 
       const { data: song } = await supabase.from("songs").insert([{
@@ -341,7 +338,10 @@ export default function Map() {
           inset: 0,
           pointerEvents: "none",
           zIndex: 5,
-          background: "radial-gradient(ellipse 65% 65% at 50% 50%, transparent 35%, rgba(6,4,4,0.7) 55%, rgba(6,4,4,1) 85%)",
+          background: `
+            linear-gradient(to right, rgba(6,4,4,0.92) 0%, transparent 20%, transparent 80%, rgba(6,4,4,0.92) 100%),
+            linear-gradient(to bottom, rgba(6,4,4,0.92) 0%, transparent 20%, transparent 80%, rgba(6,4,4,0.92) 100%)
+          `,
         }} />
 
         {/* Logo top left */}
@@ -352,7 +352,7 @@ export default function Map() {
           zIndex: 10,
         }}>
           <img
-            src="/FriendOfAFriend_Logo.png"
+            src="/FriendOfAFriend_LogoGlow.png"
             alt="Friend of a Friend"
             style={{
               width: "clamp(100px, 12vw, 160px)",
@@ -361,6 +361,16 @@ export default function Map() {
               mixBlendMode: "lighten" as const,
             }}
           />
+          <p style={{
+            fontFamily: "var(--font-dm-mono), monospace",
+            fontSize: "0.55rem",
+            color: "rgba(166,38,33,0.45)",
+            letterSpacing: "0.2em",
+            textTransform: "uppercase",
+            marginTop: "0.25rem",
+          }}>
+            The Neighborhood
+          </p>
         </div>
 
         {/* Location error banner */}
