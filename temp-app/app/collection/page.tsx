@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
 
@@ -177,8 +177,10 @@ export default function Collection() {
         backgroundColor: "#060404",
         color: ACCENT,
         fontFamily: "var(--font-dm-mono), monospace",
-        padding: "3rem max(1.5rem, 5vw)",
         paddingTop: "8rem",
+        paddingBottom: "3rem",
+        paddingLeft: "max(1.5rem, 5vw)",
+        paddingRight: "max(1.5rem, 5vw)",
         position: "relative",
         overflowY: "auto",
       }}>
