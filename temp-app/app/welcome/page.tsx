@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
@@ -11,27 +11,6 @@ export default function Welcome() {
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const headlineRef = useRef<HTMLHeadingElement>(null);
-  const [headlineFontSize, setHeadlineFontSize] = useState(64);
-
-  useEffect(() => {
-    const fit = () => {
-      if (!containerRef.current || !headlineRef.current) return;
-      const containerWidth = containerRef.current.offsetWidth;
-      let size = 16;
-      headlineRef.current.style.fontSize = size + "px";
-      while (headlineRef.current.scrollWidth <= containerWidth && size < 200) {
-        size++;
-        headlineRef.current.style.fontSize = size + "px";
-      }
-      const maxSize = window.innerWidth < 768 ? 48 : size - 1;
-      setHeadlineFontSize(Math.min(size - 1, maxSize));
-    };
-    fit();
-    window.addEventListener("resize", fit);
-    return () => window.removeEventListener("resize", fit);
-  }, []);
 
   const handleMagicLink = async () => {
     if (!email) return;
@@ -116,14 +95,6 @@ export default function Welcome() {
           border-color: rgba(192,57,43,0.15);
         }
 
-        .rule {
-          width: 100%;
-          height: 1px;
-          background: linear-gradient(90deg, ${accent} 0%, transparent 100%);
-          box-shadow: 0 0 8px ${accentGlow};
-          margin-bottom: 2rem;
-        }
-
         .grain {
           position: fixed;
           inset: 0;
@@ -155,57 +126,38 @@ export default function Welcome() {
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
-        padding: "3rem max(1.5rem, 5vw)",
+        alignItems: "center",
+        paddingTop: "8vh",
+        paddingBottom: "3rem",
+        paddingLeft: "max(1.5rem, 5vw)",
+        paddingRight: "max(1.5rem, 5vw)",
         fontFamily: "var(--font-dm-mono), monospace",
         position: "relative",
         overflow: "hidden",
       }}>
-        <div ref={containerRef} style={{ width: "100%", maxWidth: "1100px", margin: "0 auto", position: "relative", zIndex: 1 }}>
-
-          <div className="rule fade-up fade-up-1" />
-
-          <p className="fade-up fade-up-1" style={{
-            fontSize: "0.6rem",
-            letterSpacing: "0.28em",
-            textTransform: "uppercase",
-            color: accent,
-            opacity: 0.55,
-            marginBottom: "1.5rem",
-          }}>
-            Friend of a Friend™
-          </p>
+        <div style={{ width: "100%", maxWidth: "1100px", margin: "0 auto", position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
 
           {!sent ? (
             <>
-              <div style={{ width: "100%", paddingBottom: "0.2em" }}>
-                <h1
-                  ref={headlineRef}
-                  className="fade-up fade-up-2"
+              <div className="fade-up fade-up-1" style={{ width: "100%", display: "flex", justifyContent: "center", marginBottom: "2rem" }}>
+                <img
+                  src="/WelcomeLogo.png"
+                  alt="Welcome, Friend of a Friend"
                   style={{
-                    fontFamily: "var(--font-playfair), serif",
-                    fontStyle: "italic",
-                    fontWeight: 400,
-                    lineHeight: 1.15,
-                    color: accent,
-                    textShadow: `0 0 40px ${accentGlow}`,
-                    letterSpacing: "-0.01em",
-                    fontSize: `${headlineFontSize}px`,
-                    margin: 0,
-                    padding: "0 0 0.15em 0",
-                    whiteSpace: "nowrap",
-                    overflow: "visible",
+                    width: "clamp(250px, 85vw, 500px)",
+                    height: "auto",
+                    display: "block",
                   }}
-                >
-                  Welcome, Friend of a Friend.
-                </h1>
+                />
               </div>
 
               <p className="fade-up fade-up-2" style={{
                 fontSize: "0.75rem",
-                color: "rgba(192,57,43,0.55)",
+                color: "rgba(192,57,43,0.45)",
                 lineHeight: 1.85,
-                letterSpacing: "0.04em",
-                margin: "2rem 0",
+                letterSpacing: "0.06em",
+                margin: "0 0 1.5rem 0",
+                textAlign: "center",
               }}>
                 Every collection starts somewhere.<br />
                 Enter your email to begin yours.
@@ -216,6 +168,7 @@ export default function Welcome() {
                 flexDirection: "column",
                 gap: "1rem",
                 width: "100%",
+                maxWidth: "480px",
               }}>
                 <div className="search-pill-wrapper">
                   <input
@@ -238,30 +191,29 @@ export default function Welcome() {
               </div>
             </>
           ) : (
-            <div className="fade-up fade-up-2" style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
-              <h1 style={{
-                fontFamily: "var(--font-playfair), serif",
-                fontStyle: "italic",
-                fontWeight: 400,
-                fontSize: `${headlineFontSize}px`,
-                lineHeight: 1.15,
-                color: accent,
-                textShadow: `0 0 40px ${accentGlow}`,
-                padding: "0 0 0.15em 0",
-                whiteSpace: "nowrap",
-              }}>
-                Check Your Email.
-              </h1>
-              <p style={{
+            <>
+              <div className="fade-up fade-up-1" style={{ width: "100%", display: "flex", justifyContent: "center", marginBottom: "2rem" }}>
+                <img
+                  src="/WelcomeLogo.png"
+                  alt="Welcome, Friend of a Friend"
+                  style={{
+                    width: "clamp(250px, 50vw, 500px)",
+                    height: "auto",
+                    display: "block",
+                  }}
+                />
+              </div>
+              <p className="fade-up fade-up-2" style={{
                 fontSize: "0.75rem",
                 color: "rgba(192,57,43,0.55)",
                 letterSpacing: "0.04em",
                 lineHeight: 1.85,
+                textAlign: "center",
               }}>
                 We sent a link to <span style={{ color: accent }}>{email}</span>.<br />
                 Click it to enter.
               </p>
-            </div>
+            </>
           )}
         </div>
       </main>
