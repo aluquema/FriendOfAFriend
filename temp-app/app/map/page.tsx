@@ -93,8 +93,8 @@ export default function Map() {
           container: mapContainer.current!,
           style: "mapbox://styles/aluquema/cmogb5mmw000o01pfhtrxajwd",
           center: [pos.coords.longitude, pos.coords.latitude],
-          zoom: 14,
-          maxZoom: 15,
+          zoom: 15,
+          maxZoom: 16,
         });
 
         map.current.on("load", async () => {
@@ -346,33 +346,36 @@ export default function Map() {
 
         {/* Logo top left */}
         <div style={{
-          position: "absolute",
-          top: "1.5rem",
-          left: "1.5rem",
-          zIndex: 10,
-        }}>
-          <img
-            src="/FriendOfAFriend_LogoGlow.png"
-            alt="Friend of a Friend"
-            style={{
-              width: "clamp(100px, 12vw, 160px)",
-              height: "auto",
-              display: "block",
-              mixBlendMode: "lighten" as const,
-            }}
-          />
-          <p style={{
-            fontFamily: "var(--font-dm-mono), monospace",
-            fontSize: "0.55rem",
-            color: "rgba(166,38,33,0.45)",
-            letterSpacing: "0.2em",
-            textTransform: "uppercase",
-            marginTop: "0.25rem",
-          }}>
-            The Neighborhood
-          </p>
-        </div>
-
+  position: "absolute",
+  top: "1.5rem",
+  left: "1.5rem",
+  zIndex: 10,
+  pointerEvents: "none",
+  display: "flex",
+  alignItems: "center",
+  gap: "1rem",
+}}>
+  <img
+    src="/LogoTransparent.png"
+    alt="Friend of a Friend"
+    style={{
+      width: "clamp(80px, 10vw, 130px)",
+      height: "auto",
+      display: "block",
+    }}
+  />
+  <p style={{
+    fontFamily: "var(--font-playfair), serif",
+    fontStyle: "italic",
+    fontWeight: 700,
+    fontSize: "clamp(1rem, 2.0vw, 1.8rem)",
+    color: "#a62621",
+    letterSpacing: "0.02em",
+    margin: 0,
+  }}>
+    The Neighborhood
+  </p>
+</div>
         {/* Location error banner */}
         {locationError && (
           <div style={{

@@ -40,7 +40,7 @@ export default function Home() {
   };
 
   const accent = "#a62621";
-  const accentDim = "rgba(166,38,33,0.18)";
+  const accentDim = "rgba(166,38,33,0.4)";
   const accentGlow = "rgba(166,38,33,0.4)";
   const accentFaint = "rgba(166,38,33,0.08)";
 
@@ -60,7 +60,7 @@ export default function Home() {
         .search-pill-wrapper {
           display: flex;
           align-items: center;
-          border: 1px solid rgba(166,38,33,0.25);
+          border: 1px solid rgba(166,38,33,0.45);
           border-radius: 999px;
           padding: 0.3rem 0.3rem 0.3rem 1.5rem;
           transition: border-color 0.2s, box-shadow 0.2s;
@@ -84,7 +84,7 @@ export default function Home() {
           caret-color: ${accent};
           min-width: 0;
         }
-        .pill-input::placeholder { color: rgba(166,38,33,0.3); }
+        .pill-input::placeholder { color: rgba(166,38,33,0.55); }
 
         .pill-search-btn {
           background: ${accent};
@@ -125,9 +125,9 @@ export default function Home() {
         }
         .pill-btn-full.inactive {
           background: transparent;
-          color: rgba(166,38,33,0.25);
+          color: rgba(166,38,33,0.45);
           cursor: default;
-          border-color: rgba(166,38,33,0.15);
+          border-color: rgba(166,38,33,0.35);
         }
         .pill-btn-full.active:hover {
           background: #8a1e1a;
@@ -140,18 +140,18 @@ export default function Home() {
           gap: 0.75rem;
           padding: 0.65rem 1.1rem;
           cursor: pointer;
-          border-bottom: 1px solid rgba(166,38,33,0.08);
+          border-bottom: 1px solid rgba(166,38,33,0.15);
           transition: background 0.15s;
         }
         .result-row:last-child { border-bottom: none; }
-        .result-row:hover { background: rgba(166,38,33,0.06); }
+        .result-row:hover { background: rgba(166,38,33,0.08); }
 
         .grain {
           position: fixed;
           inset: 0;
           pointer-events: none;
           z-index: 9999;
-          opacity: 0.06;
+          opacity: 0.12;
           mix-blend-mode: overlay;
           background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
         }
@@ -177,7 +177,15 @@ export default function Home() {
         left: "max(1.5rem, 5vw)",
         zIndex: 10,
       }}>
-      
+        <img
+          src="/LogoTransparent.png"
+          alt="Friend of a Friend"
+          style={{
+            width: "clamp(80px, 10vw, 130px)",
+            height: "auto",
+            display: "block",
+          }}
+        />
       </div>
 
       <main style={{
@@ -218,6 +226,7 @@ export default function Home() {
                   fontSize: "clamp(2.5rem, 4.2vw, 4.5rem)",
                   margin: 0,
                   padding: 0,
+                  textShadow: "0 0 30px rgba(166,38,33,0.4)",
                 }}>
                   Every neighborhood
                 </h1>
@@ -231,6 +240,7 @@ export default function Home() {
                   fontSize: "clamp(2.5rem, 4.2vw, 4.5rem)",
                   margin: 0,
                   padding: 0,
+                  textShadow: "0 0 30px rgba(166,38,33,0.4)",
                 }}>
                   has a sound.
                 </h1>
@@ -238,8 +248,8 @@ export default function Home() {
 
               <div className="fade-up fade-up-2" style={{ display: "flex", flexDirection: "column", gap: "1.5rem", width: "100%" }}>
                 <p style={{
-                  fontSize: "0.75rem",
-                  color: "rgba(166,38,33,0.45)",
+                  fontSize: "0.78rem",
+                  color: "rgba(166,38,33,0.75)",
                   lineHeight: 1.85,
                   letterSpacing: "0.04em",
                 }}>
@@ -276,7 +286,7 @@ export default function Home() {
                         />
                         <div>
                           <p style={{ fontSize: "0.74rem", color: accent, marginBottom: "0.1rem" }}>{track.name}</p>
-                          <p style={{ fontSize: "0.63rem", color: "rgba(166,38,33,0.4)" }}>{track.artists[0].name}</p>
+                          <p style={{ fontSize: "0.63rem", color: "rgba(166,38,33,0.65)" }}>{track.artists[0].name}</p>
                         </div>
                       </div>
                     ))}
@@ -298,10 +308,10 @@ export default function Home() {
                     />
                     <div style={{ flex: 1 }}>
                       <p style={{ fontSize: "0.74rem", color: accent }}>{selected.name}</p>
-                      <p style={{ fontSize: "0.63rem", color: "rgba(166,38,33,0.4)" }}>{selected.artists[0].name}</p>
+                      <p style={{ fontSize: "0.63rem", color: "rgba(166,38,33,0.65)" }}>{selected.artists[0].name}</p>
                     </div>
                     <button onClick={() => setSelected(null)}
-                      style={{ background: "none", border: "none", color: "rgba(166,38,33,0.3)", cursor: "pointer", fontSize: "0.7rem" }}
+                      style={{ background: "none", border: "none", color: "rgba(166,38,33,0.55)", cursor: "pointer", fontSize: "0.7rem" }}
                     >✕</button>
                   </div>
                 )}
@@ -329,13 +339,13 @@ export default function Home() {
                   onClick={() => setShowLogin(true)}
                   style={{
                     width: "100%", background: "none", border: "none",
-                    color: "rgba(166,38,33,0.22)", fontSize: "0.62rem",
+                    color: "rgba(166,38,33,0.55)", fontSize: "0.65rem",
                     fontFamily: "var(--font-dm-mono), monospace",
                     letterSpacing: "0.1em", cursor: "pointer",
                     padding: "0.25rem", transition: "color 0.2s", textAlign: "center",
                   }}
                   onMouseEnter={(e) => (e.currentTarget.style.color = accent)}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(166,38,33,0.22)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(166,38,33,0.55)")}
                 >
                   Returning? Sign In
                 </button>
@@ -352,6 +362,7 @@ export default function Home() {
                   color: accent,
                   fontSize: "clamp(2.5rem, 4.2vw, 4.5rem)",
                   margin: 0,
+                  textShadow: "0 0 30px rgba(166,38,33,0.4)",
                 }}>
                   Welcome
                 </h1>
@@ -363,6 +374,7 @@ export default function Home() {
                   color: accent,
                   fontSize: "clamp(2.5rem, 4.2vw, 4.5rem)",
                   margin: 0,
+                  textShadow: "0 0 30px rgba(166,38,33,0.4)",
                 }}>
                   Back.
                 </h1>
@@ -370,7 +382,7 @@ export default function Home() {
 
               {!sent ? (
                 <div className="fade-up fade-up-2" style={{ display: "flex", flexDirection: "column", gap: "0.75rem", width: "100%" }}>
-                  <p style={{ fontSize: "0.72rem", color: "rgba(166,38,33,0.45)", letterSpacing: "0.04em" }}>
+                  <p style={{ fontSize: "0.78rem", color: "rgba(166,38,33,0.75)", letterSpacing: "0.04em" }}>
                     Enter your email to get your link.
                   </p>
                   <div className="search-pill-wrapper">
@@ -392,20 +404,20 @@ export default function Home() {
                   <button
                     onClick={() => setShowLogin(false)}
                     style={{
-                      background: "none", border: "none", color: "rgba(166,38,33,0.22)",
-                      fontSize: "0.62rem", fontFamily: "var(--font-dm-mono), monospace",
+                      background: "none", border: "none", color: "rgba(166,38,33,0.55)",
+                      fontSize: "0.65rem", fontFamily: "var(--font-dm-mono), monospace",
                       letterSpacing: "0.1em", cursor: "pointer", padding: "0.5rem", transition: "color 0.2s",
                     }}
                     onMouseEnter={(e) => (e.currentTarget.style.color = accent)}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(166,38,33,0.22)")}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(166,38,33,0.55)")}
                   >
                     ← Back
                   </button>
                 </div>
               ) : (
                 <div className="fade-up fade-up-2">
-                  <p style={{ fontSize: "0.9rem", color: accent, marginBottom: "0.75rem" }}>Check Your Email.</p>
-                  <p style={{ fontSize: "0.72rem", color: "rgba(166,38,33,0.45)", letterSpacing: "0.04em" }}>
+                  <p style={{ fontSize: "0.9rem", color: accent, marginBottom: "0.75rem", textShadow: "0 0 30px rgba(166,38,33,0.4)" }}>Check Your Email.</p>
+                  <p style={{ fontSize: "0.78rem", color: "rgba(166,38,33,0.75)", letterSpacing: "0.04em" }}>
                     We sent a link to <span style={{ color: accent }}>{email}</span>. Click it to enter.
                   </p>
                 </div>
