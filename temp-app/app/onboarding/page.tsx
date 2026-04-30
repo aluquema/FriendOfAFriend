@@ -88,10 +88,10 @@ export default function Onboarding() {
   const accentDim = "rgba(192,57,43,0.2)";
   const accentFaint = "rgba(192,57,43,0.08)";
 
-  const headlines: Record<number, string> = {
-    1: "What Should We Call Your Collection?",
-    2: "How Old Are You?",
-    3: "How Do You Identify?",
+  const headlines: Record<number, string[]> = {
+    1: ["What Should We Call", "Your Collection?"],
+    2: ["How Old", "Are You?"],
+    3: ["How Do You", "Identify?"],
   };
 
   return (
@@ -190,14 +190,6 @@ export default function Onboarding() {
           box-shadow: 0 0 16px ${accentGlow};
         }
 
-        .rule {
-          width: 100%;
-          height: 1px;
-          background: linear-gradient(90deg, ${accent} 0%, transparent 100%);
-          box-shadow: 0 0 8px ${accentGlow};
-          margin-bottom: 2rem;
-        }
-
         .grain {
           position: fixed;
           inset: 0;
@@ -222,6 +214,24 @@ export default function Onboarding() {
       <div className="grain" />
       <div className="light-leak" />
 
+      {/* Logo fixed top left */}
+      <div style={{
+        position: "fixed",
+        top: "1.5rem",
+        left: "max(1.5rem, 5vw)",
+        zIndex: 10,
+      }}>
+        <img
+          src="/FriendOfAFriend_Logo.png"
+          alt="Friend of a Friend"
+          style={{
+            width: "clamp(100px, 12vw, 160px)",
+            height: "auto",
+            display: "block",
+          }}
+        />
+      </div>
+
       <main style={{
         minHeight: "100vh",
         backgroundColor: "#060404",
@@ -229,25 +239,23 @@ export default function Onboarding() {
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
+        alignItems: "center",
         padding: "3rem max(1.5rem, 5vw)",
         fontFamily: "var(--font-dm-mono), monospace",
         position: "relative",
         overflow: "hidden",
       }}>
-        <div style={{ width: "100%", maxWidth: "1100px", margin: "0 auto", position: "relative", zIndex: 1 }}>
-
-          <div className="rule fade-up fade-up-1" />
-
-          <p className="fade-up fade-up-1" style={{
-            fontSize: "0.6rem",
-            letterSpacing: "0.28em",
-            textTransform: "uppercase",
-            color: accent,
-            opacity: 0.55,
-            marginBottom: "1.5rem",
-          }}>
-            Friend of a Friend™
-          </p>
+        <div style={{
+          width: "100%",
+          maxWidth: "600px",
+          margin: "0 auto",
+          position: "relative",
+          zIndex: 1,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          textAlign: "center",
+        }}>
 
           {entrySong && (
             <div className="fade-up fade-up-1" style={{
@@ -270,25 +278,27 @@ export default function Onboarding() {
             </div>
           )}
 
-          <div style={{ width: "100%", paddingBottom: "0.2em", marginBottom: "2rem" }}>
-            <h1
-              className="fade-up fade-up-2"
-              style={{
-                fontFamily: "var(--font-playfair), serif",
-                fontStyle: "italic",
-                fontWeight: 400,
-                lineHeight: 1.15,
-                color: accent,
-                textShadow: "0 0 40px " + accentGlow + ", 0 0 100px rgba(192,57,43,0.12)",
-                letterSpacing: "-0.01em",
-                fontSize: "clamp(1.8rem, 3.5vw, 3.8rem)",
-                margin: 0,
-                padding: "0 0 0.15em 0",
-                overflow: "visible",
-              }}
-            >
-              {headlines[step]}
-            </h1>
+          {/* Stacked bold headline */}
+          <div className="fade-up fade-up-2" style={{ marginBottom: "2rem", width: "100%" }}>
+            {headlines[step].map((line, i) => (
+              <h1
+                key={i}
+                style={{
+                  fontFamily: "var(--font-playfair), serif",
+                  fontStyle: "italic",
+                  fontWeight: 700,
+                  lineHeight: 1.1,
+                  color: accent,
+                  textShadow: "0 0 40px " + accentGlow + ", 0 0 100px rgba(192,57,43,0.12)",
+                  letterSpacing: "-0.01em",
+                  fontSize: "clamp(2.5rem, 4.2vw, 4.5rem)",
+                  margin: 0,
+                  padding: 0,
+                }}
+              >
+                {line}
+              </h1>
+            ))}
           </div>
 
           <div className="fade-up fade-up-3" style={{ display: "flex", flexDirection: "column", gap: "1rem", width: "100%" }}>
