@@ -83,10 +83,10 @@ export default function Onboarding() {
     }
   };
 
-  const accent = "#c0392b";
-  const accentGlow = "rgba(192,57,43,0.4)";
-  const accentDim = "rgba(192,57,43,0.2)";
-  const accentFaint = "rgba(192,57,43,0.08)";
+  const accent = "#a62621";
+  const accentGlow = "rgba(166,38,33,0.4)";
+  const accentDim = "rgba(166,38,33,0.2)";
+  const accentFaint = "rgba(166,38,33,0.08)";
 
   const headlines: Record<number, string[]> = {
     1: ["What Should We Call", "Your Collection?"],
@@ -109,7 +109,7 @@ export default function Onboarding() {
         .pill-input-wrapper {
           display: flex;
           align-items: center;
-          border: 1px solid rgba(192,57,43,0.3);
+          border: 1px solid rgba(166,38,33,0.3);
           border-radius: 999px;
           padding: 0.6rem 0.6rem 0.6rem 1.5rem;
           min-height: 3.2rem;
@@ -119,7 +119,7 @@ export default function Onboarding() {
         }
         .pill-input-wrapper:focus-within {
           border-color: ${accent};
-          box-shadow: 0 0 14px ${accentGlow}, inset 0 0 8px rgba(192,57,43,0.04);
+          box-shadow: 0 0 14px ${accentGlow};
         }
 
         .pill-input {
@@ -135,7 +135,7 @@ export default function Onboarding() {
           min-width: 0;
           padding: 0.4rem 0;
         }
-        .pill-input::placeholder { color: rgba(192,57,43,0.35); }
+        .pill-input::placeholder { color: rgba(166,38,33,0.35); }
 
         .pill-btn-full {
           width: 100%;
@@ -153,24 +153,24 @@ export default function Onboarding() {
         .pill-btn-full.active {
           background: ${accent};
           color: #080808;
-          box-shadow: 0 0 24px ${accentGlow}, 0 0 60px rgba(192,57,43,0.15);
+          box-shadow: 0 0 24px ${accentGlow};
         }
         .pill-btn-full.inactive {
           background: transparent;
-          color: rgba(192,57,43,0.3);
+          color: rgba(166,38,33,0.3);
           cursor: default;
-          border-color: rgba(192,57,43,0.15);
+          border-color: rgba(166,38,33,0.15);
         }
         .pill-btn-full.active:hover {
-          background: #a93226;
+          background: #8a1e1a;
           box-shadow: 0 0 36px ${accentGlow};
         }
 
         .option-btn {
           border-radius: 999px;
-          border: 1px solid rgba(192,57,43,0.25);
+          border: 1px solid rgba(166,38,33,0.25);
           background: transparent;
-          color: rgba(192,57,43,0.55);
+          color: rgba(166,38,33,0.55);
           font-family: var(--font-dm-mono), monospace;
           font-size: 0.72rem;
           letter-spacing: 0.1em;
@@ -206,8 +206,8 @@ export default function Onboarding() {
           pointer-events: none;
           z-index: 0;
           background:
-            radial-gradient(ellipse 50% 55% at -5% 100%, rgba(160,30,15,0.45) 0%, transparent 65%),
-            radial-gradient(ellipse 35% 35% at 105% 0%, rgba(140,20,10,0.3) 0%, transparent 60%);
+            radial-gradient(ellipse 50% 55% at -5% 100%, rgba(140,30,25,0.45) 0%, transparent 65%),
+            radial-gradient(ellipse 35% 35% at 105% 0%, rgba(120,20,15,0.3) 0%, transparent 60%);
         }
       `}</style>
 
@@ -272,13 +272,12 @@ export default function Onboarding() {
                 <img src={entrySong.coverArt} alt="" style={{ width: 32, height: 32, objectFit: "cover", borderRadius: "999px" }} />
               )}
               <div>
-                <p style={{ fontSize: "0.58rem", color: "rgba(192,57,43,0.45)", letterSpacing: "0.08em", textTransform: "uppercase" }}>Your Entry Song</p>
+                <p style={{ fontSize: "0.58rem", color: "rgba(166,38,33,0.45)", letterSpacing: "0.08em", textTransform: "uppercase" }}>Your Entry Song</p>
                 <p style={{ fontSize: "0.72rem", color: accent }}>{entrySong.title} — {entrySong.artist}</p>
               </div>
             </div>
           )}
 
-          {/* Stacked bold headline */}
           <div className="fade-up fade-up-2" style={{ marginBottom: "2rem", width: "100%" }}>
             {headlines[step].map((line, i) => (
               <h1
@@ -289,7 +288,6 @@ export default function Onboarding() {
                   fontWeight: 700,
                   lineHeight: 1.1,
                   color: accent,
-                  textShadow: "0 0 40px " + accentGlow + ", 0 0 100px rgba(192,57,43,0.12)",
                   letterSpacing: "-0.01em",
                   fontSize: "clamp(2.5rem, 4.2vw, 4.5rem)",
                   margin: 0,
@@ -349,7 +347,7 @@ export default function Onboarding() {
 
             {step === 3 && (
               <>
-                <p style={{ fontSize: "0.65rem", color: "rgba(192,57,43,0.35)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+                <p style={{ fontSize: "0.65rem", color: "rgba(166,38,33,0.35)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
                   Optional
                 </p>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
@@ -380,7 +378,7 @@ export default function Onboarding() {
                 width: s === step ? "1.5rem" : "0.4rem",
                 height: "0.4rem",
                 borderRadius: "999px",
-                background: s === step ? accent : "rgba(192,57,43,0.2)",
+                background: s === step ? accent : "rgba(166,38,33,0.2)",
                 transition: "all 0.3s",
               }} />
             ))}

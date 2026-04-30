@@ -1,6 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
@@ -18,27 +18,6 @@ export default function Home() {
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
   const [loginLoading, setLoginLoading] = useState(false);
-  const [headlineFontSize, setHeadlineFontSize] = useState(64);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const headlineRef = useRef<HTMLHeadingElement>(null);
-
-  useEffect(() => {
-    const fit = () => {
-      if (!containerRef.current || !headlineRef.current) return;
-      const containerWidth = containerRef.current.offsetWidth;
-      let size = 16;
-      headlineRef.current.style.fontSize = size + "px";
-      while (headlineRef.current.scrollWidth <= containerWidth && size < 200) {
-        size++;
-        headlineRef.current.style.fontSize = size + "px";
-      }
-      const maxSize = window.innerWidth < 768 ? 52 : size - 1;
-      setHeadlineFontSize(Math.min(size - 1, maxSize));
-    };
-    fit();
-    window.addEventListener("resize", fit);
-    return () => window.removeEventListener("resize", fit);
-  }, []);
 
   const searchSongs = async () => {
     if (!query) return;
@@ -60,10 +39,10 @@ export default function Home() {
     setLoginLoading(false);
   };
 
-  const accent = "#c0392b";
-  const accentDim = "rgba(192,57,43,0.18)";
-  const accentGlow = "rgba(192,57,43,0.4)";
-  const accentFaint = "rgba(192,57,43,0.08)";
+  const accent = "#a62621";
+  const accentDim = "rgba(166,38,33,0.18)";
+  const accentGlow = "rgba(166,38,33,0.4)";
+  const accentFaint = "rgba(166,38,33,0.08)";
 
   return (
     <>
@@ -77,12 +56,11 @@ export default function Home() {
         .fade-up-2 { animation-delay: 0.15s; }
         .fade-up-3 { animation-delay: 0.25s; }
         .fade-up-4 { animation-delay: 0.35s; }
-        .fade-up-5 { animation-delay: 0.45s; }
 
         .search-pill-wrapper {
           display: flex;
           align-items: center;
-          border: 1px solid rgba(192,57,43,0.25);
+          border: 1px solid rgba(166,38,33,0.25);
           border-radius: 999px;
           padding: 0.3rem 0.3rem 0.3rem 1.5rem;
           transition: border-color 0.2s, box-shadow 0.2s;
@@ -91,7 +69,7 @@ export default function Home() {
         }
         .search-pill-wrapper:focus-within {
           border-color: ${accent};
-          box-shadow: 0 0 14px ${accentGlow}, inset 0 0 8px rgba(192,57,43,0.04);
+          box-shadow: 0 0 14px ${accentGlow};
         }
 
         .pill-input {
@@ -106,7 +84,7 @@ export default function Home() {
           caret-color: ${accent};
           min-width: 0;
         }
-        .pill-input::placeholder { color: rgba(192,57,43,0.3); }
+        .pill-input::placeholder { color: rgba(166,38,33,0.3); }
 
         .pill-search-btn {
           background: ${accent};
@@ -125,7 +103,7 @@ export default function Home() {
         }
         .pill-search-btn:hover {
           box-shadow: 0 0 18px ${accentGlow};
-          background: #a93226;
+          background: #8a1e1a;
         }
 
         .pill-btn-full {
@@ -143,17 +121,17 @@ export default function Home() {
         .pill-btn-full.active {
           background: ${accent};
           color: #080808;
-          box-shadow: 0 0 24px ${accentGlow}, 0 0 60px rgba(192,57,43,0.12);
+          box-shadow: 0 0 24px ${accentGlow};
         }
         .pill-btn-full.inactive {
           background: transparent;
-          color: rgba(192,57,43,0.25);
+          color: rgba(166,38,33,0.25);
           cursor: default;
-          border-color: rgba(192,57,43,0.15);
+          border-color: rgba(166,38,33,0.15);
         }
         .pill-btn-full.active:hover {
-          background: #a93226;
-          box-shadow: 0 0 36px ${accentGlow}, 0 0 80px rgba(192,57,43,0.18);
+          background: #8a1e1a;
+          box-shadow: 0 0 36px ${accentGlow};
         }
 
         .result-row {
@@ -162,19 +140,11 @@ export default function Home() {
           gap: 0.75rem;
           padding: 0.65rem 1.1rem;
           cursor: pointer;
-          border-bottom: 1px solid rgba(192,57,43,0.08);
+          border-bottom: 1px solid rgba(166,38,33,0.08);
           transition: background 0.15s;
         }
         .result-row:last-child { border-bottom: none; }
-        .result-row:hover { background: rgba(192,57,43,0.06); }
-
-        .rule {
-          width: 100%;
-          height: 1px;
-          background: linear-gradient(90deg, ${accent} 0%, transparent 100%);
-          box-shadow: 0 0 8px ${accentGlow};
-          margin-bottom: 2rem;
-        }
+        .result-row:hover { background: rgba(166,38,33,0.06); }
 
         .grain {
           position: fixed;
@@ -192,19 +162,23 @@ export default function Home() {
           pointer-events: none;
           z-index: 0;
           background:
-            radial-gradient(ellipse 50% 55% at -5% 100%, rgba(160,30,15,0.45) 0%, transparent 65%),
-            radial-gradient(ellipse 35% 35% at 105% 0%, rgba(140,20,10,0.3) 0%, transparent 60%);
-        }
-
-        @media (max-width: 768px) {
-          .search-pill-wrapper { padding: 0.5rem 0.5rem 0.5rem 1.25rem; }
-          .pill-search-btn { padding: 0.6rem 1rem; font-size: 0.62rem; }
-          .pill-btn-full { padding: 0.85rem 1rem; font-size: 0.65rem; }
+            radial-gradient(ellipse 50% 55% at -5% 100%, rgba(140,30,25,0.45) 0%, transparent 65%),
+            radial-gradient(ellipse 35% 35% at 105% 0%, rgba(120,20,15,0.3) 0%, transparent 60%);
         }
       `}</style>
 
       <div className="grain" />
       <div className="light-leak" />
+
+      {/* Logo fixed top left */}
+      <div style={{
+        position: "fixed",
+        top: "1.5rem",
+        left: "max(1.5rem, 5vw)",
+        zIndex: 10,
+      }}>
+      
+      </div>
 
       <main style={{
         minHeight: "100vh",
@@ -213,78 +187,63 @@ export default function Home() {
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
+        alignItems: "center",
         padding: "3rem max(1.5rem, 5vw)",
         fontFamily: "var(--font-dm-mono), monospace",
         position: "relative",
         overflow: "hidden",
       }}>
-        <div ref={containerRef} style={{ width: "100%", maxWidth: "1100px", margin: "0 auto" }}>
-
-          <div className="rule fade-up fade-up-1" />
-
-          <p className="fade-up fade-up-1" style={{
-            fontSize: "0.6rem",
-            letterSpacing: "0.28em",
-            textTransform: "uppercase",
-            color: accent,
-            opacity: 0.55,
-            marginBottom: "1.25rem",
-          }}>
-            Friend of a Friend™
-          </p>
+        <div style={{
+          width: "100%",
+          maxWidth: "600px",
+          margin: "0 auto",
+          position: "relative",
+          zIndex: 1,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          textAlign: "center",
+        }}>
 
           {!showLogin ? (
             <>
-              <div style={{ width: "100%", marginBottom: "2rem", paddingBottom: "0.2em" }}>
-                <h1
-                  ref={headlineRef}
-                  className="fade-up fade-up-2"
-                  style={{
-                    fontFamily: "var(--font-playfair), serif",
-                    fontStyle: "italic",
-                    fontWeight: 400,
-                    lineHeight: 1.15,
-                    color: accent,
-                    textShadow: `0 0 30px ${accentGlow}, 0 0 80px rgba(192,57,43,0.1)`,
-                    letterSpacing: "-0.01em",
-                    fontSize: `${headlineFontSize}px`,
-                    margin: 0,
-                    padding: "0 0 0.15em 0",
-                    whiteSpace: "nowrap",
-                    overflow: "visible",
-                  }}
-                >
-                  Every neighborhood has a sound.
+              <div className="fade-up fade-up-1" style={{ marginBottom: "2rem", width: "100%" }}>
+                <h1 style={{
+                  fontFamily: "var(--font-playfair), serif",
+                  fontStyle: "italic",
+                  fontWeight: 700,
+                  lineHeight: 1.1,
+                  color: accent,
+                  letterSpacing: "-0.01em",
+                  fontSize: "clamp(2.5rem, 4.2vw, 4.5rem)",
+                  margin: 0,
+                  padding: 0,
+                }}>
+                  Every neighborhood
                 </h1>
-                <h1
-                  className="fade-up fade-up-2"
-                  style={{
-                    fontFamily: "var(--font-playfair), serif",
-                    fontStyle: "italic",
-                    fontWeight: 400,
-                    lineHeight: 1.15,
-                    color: accent,
-                    textShadow: `0 0 30px ${accentGlow}, 0 0 80px rgba(192,57,43,0.1)`,
-                    letterSpacing: "-0.01em",
-                    fontSize: `${headlineFontSize}px`,
-                    margin: 0,
-                    padding: "0 0 0.15em 0",
-                    whiteSpace: "nowrap",
-                    overflow: "visible",
-                  }}
-                >
-                  Every person has a song.
+                <h1 style={{
+                  fontFamily: "var(--font-playfair), serif",
+                  fontStyle: "italic",
+                  fontWeight: 700,
+                  lineHeight: 1.1,
+                  color: accent,
+                  letterSpacing: "-0.01em",
+                  fontSize: "clamp(2.5rem, 4.2vw, 4.5rem)",
+                  margin: 0,
+                  padding: 0,
+                }}>
+                  has a sound.
                 </h1>
               </div>
 
-              <div className="fade-up fade-up-3" style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+              <div className="fade-up fade-up-2" style={{ display: "flex", flexDirection: "column", gap: "1.5rem", width: "100%" }}>
                 <p style={{
                   fontSize: "0.75rem",
-                  color: "rgba(192,57,43,0.45)",
+                  color: "rgba(166,38,33,0.45)",
                   lineHeight: 1.85,
                   letterSpacing: "0.04em",
                 }}>
-                  This is a place built on music — not followers, not likes. Just people and the songs that find them.<br />
+                  This is a place built on music — not followers, not likes.<br />
                   Drop a song to get in. Find out who else is here.
                 </p>
 
@@ -308,6 +267,7 @@ export default function Home() {
                     borderRadius: "16px",
                     overflow: "hidden",
                     background: "rgba(6,4,4,0.9)",
+                    textAlign: "left",
                   }}>
                     {results.slice(0, 5).map((track) => (
                       <div key={track.id} className="result-row" onClick={() => setSelected(track)}>
@@ -316,7 +276,7 @@ export default function Home() {
                         />
                         <div>
                           <p style={{ fontSize: "0.74rem", color: accent, marginBottom: "0.1rem" }}>{track.name}</p>
-                          <p style={{ fontSize: "0.63rem", color: "rgba(192,57,43,0.4)" }}>{track.artists[0].name}</p>
+                          <p style={{ fontSize: "0.63rem", color: "rgba(166,38,33,0.4)" }}>{track.artists[0].name}</p>
                         </div>
                       </div>
                     ))}
@@ -331,16 +291,17 @@ export default function Home() {
                     borderRadius: "16px",
                     boxShadow: `0 0 20px ${accentGlow}`,
                     background: accentFaint,
+                    textAlign: "left",
                   }}>
                     <img src={selected.album.images[2]?.url} alt=""
                       style={{ width: 38, height: 38, objectFit: "cover", borderRadius: 4 }}
                     />
                     <div style={{ flex: 1 }}>
                       <p style={{ fontSize: "0.74rem", color: accent }}>{selected.name}</p>
-                      <p style={{ fontSize: "0.63rem", color: "rgba(192,57,43,0.4)" }}>{selected.artists[0].name}</p>
+                      <p style={{ fontSize: "0.63rem", color: "rgba(166,38,33,0.4)" }}>{selected.artists[0].name}</p>
                     </div>
                     <button onClick={() => setSelected(null)}
-                      style={{ background: "none", border: "none", color: "rgba(192,57,43,0.3)", cursor: "pointer", fontSize: "0.7rem" }}
+                      style={{ background: "none", border: "none", color: "rgba(166,38,33,0.3)", cursor: "pointer", fontSize: "0.7rem" }}
                     >✕</button>
                   </div>
                 )}
@@ -368,37 +329,48 @@ export default function Home() {
                   onClick={() => setShowLogin(true)}
                   style={{
                     width: "100%", background: "none", border: "none",
-                    color: "rgba(192,57,43,0.22)", fontSize: "0.62rem",
+                    color: "rgba(166,38,33,0.22)", fontSize: "0.62rem",
                     fontFamily: "var(--font-dm-mono), monospace",
                     letterSpacing: "0.1em", cursor: "pointer",
                     padding: "0.25rem", transition: "color 0.2s", textAlign: "center",
                   }}
                   onMouseEnter={(e) => (e.currentTarget.style.color = accent)}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(192,57,43,0.22)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(166,38,33,0.22)")}
                 >
                   Returning? Sign In
                 </button>
               </div>
             </>
           ) : (
-            <div>
-              <h1 className="fade-up fade-up-2" style={{
-                fontFamily: "var(--font-playfair), serif",
-                fontStyle: "italic",
-                fontSize: `${headlineFontSize}px`,
-                fontWeight: 400,
-                color: accent,
-                textShadow: `0 0 30px ${accentGlow}, 0 0 80px rgba(192,57,43,0.1)`,
-                marginBottom: "1.75rem",
-                lineHeight: 1.15,
-                padding: "0 0 0.15em 0",
-              }}>
-                Welcome Back.
-              </h1>
+            <div style={{ width: "100%" }}>
+              <div className="fade-up fade-up-1" style={{ marginBottom: "2rem" }}>
+                <h1 style={{
+                  fontFamily: "var(--font-playfair), serif",
+                  fontStyle: "italic",
+                  fontWeight: 700,
+                  lineHeight: 1.1,
+                  color: accent,
+                  fontSize: "clamp(2.5rem, 4.2vw, 4.5rem)",
+                  margin: 0,
+                }}>
+                  Welcome
+                </h1>
+                <h1 style={{
+                  fontFamily: "var(--font-playfair), serif",
+                  fontStyle: "italic",
+                  fontWeight: 700,
+                  lineHeight: 1.1,
+                  color: accent,
+                  fontSize: "clamp(2.5rem, 4.2vw, 4.5rem)",
+                  margin: 0,
+                }}>
+                  Back.
+                </h1>
+              </div>
 
               {!sent ? (
-                <div className="fade-up fade-up-3" style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-                  <p style={{ fontSize: "0.72rem", color: "rgba(192,57,43,0.45)", letterSpacing: "0.04em" }}>
+                <div className="fade-up fade-up-2" style={{ display: "flex", flexDirection: "column", gap: "0.75rem", width: "100%" }}>
+                  <p style={{ fontSize: "0.72rem", color: "rgba(166,38,33,0.45)", letterSpacing: "0.04em" }}>
                     Enter your email to get your link.
                   </p>
                   <div className="search-pill-wrapper">
@@ -420,20 +392,20 @@ export default function Home() {
                   <button
                     onClick={() => setShowLogin(false)}
                     style={{
-                      background: "none", border: "none", color: "rgba(192,57,43,0.22)",
+                      background: "none", border: "none", color: "rgba(166,38,33,0.22)",
                       fontSize: "0.62rem", fontFamily: "var(--font-dm-mono), monospace",
                       letterSpacing: "0.1em", cursor: "pointer", padding: "0.5rem", transition: "color 0.2s",
                     }}
                     onMouseEnter={(e) => (e.currentTarget.style.color = accent)}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(192,57,43,0.22)")}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(166,38,33,0.22)")}
                   >
                     ← Back
                   </button>
                 </div>
               ) : (
-                <div className="fade-up fade-up-3">
+                <div className="fade-up fade-up-2">
                   <p style={{ fontSize: "0.9rem", color: accent, marginBottom: "0.75rem" }}>Check Your Email.</p>
-                  <p style={{ fontSize: "0.72rem", color: "rgba(192,57,43,0.45)", letterSpacing: "0.04em" }}>
+                  <p style={{ fontSize: "0.72rem", color: "rgba(166,38,33,0.45)", letterSpacing: "0.04em" }}>
                     We sent a link to <span style={{ color: accent }}>{email}</span>. Click it to enter.
                   </p>
                 </div>
